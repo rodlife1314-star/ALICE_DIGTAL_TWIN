@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "DigitalTwin": {
+      "title": "Digital Twin",
+      "description": "Domain-neutral digital twin entity definition",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the digital twin"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the twin"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain classification (biological, engineered, environmental, musical, physical)"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Operational purpose of the twin"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["id", "name", "domain"]
+    }
+  },
+  "firestore": {
+    "/twins/{twinId}": {
+      "schema": "DigitalTwin",
+      "description": "Collection storing digital twin models and evidence configurations"
+    }
+  }
+}

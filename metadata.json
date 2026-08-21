@@ -1,0 +1,8 @@
+{
+  "name": "ALICE Twin",
+  "description": ". Pathfinder is a domain-neutral, evidence-governed digital twin substrate for constructing, simulating and visualising complex physical, operational and historical systems. Its multi-scale Twin Observatory transforms canonical twin states into interactive 3D environments, allowing the Operator to move from ecosystem to microstructure, modify boundary conditions and observe simulated changes in real time.\n\nEvery entity, reconstruction, inference and simulation remains truth-classified, provenance-linked and subject to validation before promotion. Pathfinder combines local deterministic runtime contracts with optional external AI and accelerated-compute rails while preserving its core law: acceleration increases capability; authority remains with the Sovereign Operator.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
