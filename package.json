@@ -1,13 +1,15 @@
 {
-  "name": "react-example",
+  "name": "pathfinder-digital-twin-substrate",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Domain-neutral digital-twin substrate for evidence-governed multi-scale simulation and epistemic lifecycle execution",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
+    "test": "tsx src/lib/invariants.test.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

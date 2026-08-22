@@ -7,7 +7,11 @@ export type DigitalTwinDomain =
   | "engineered"
   | "musical"
   | "conceptual"
-  | "hybrid";
+  | "hybrid"
+  | "materials"
+  | "historical_kinematics"
+  | "passive_cooling"
+  | "culinary";
 
 export interface BoundaryChannel {
   id: string;

@@ -11,13 +11,19 @@ import { SYSTEM_CAPABILITY_REGISTRY, SYSTEM_INFERENCE_RAILS, selectBestFitModel 
 import { SEED_TWINS } from "./src/data/seedTwins";
 import { evaluateSignalToNoise, computeCandidateScore, DEFAULT_ATTENTION_CONFIG } from "./src/lib/signalToNoise";
 import { evaluateActiveMembrane, DEFAULT_ATMOSPHERIC_STATE, INITIAL_MEMBRANE_REGIONS } from "./src/lib/activeMembraneEngine";
+import { NeMoSwitchyardRouter, SWITCHYARD_MODEL_CATALOG } from "./src/lib/nemoSwitchyardRouter";
+import { DogwoodPolicyEngine } from "./src/lib/dogwoodPolicyEngine";
+import { JetsonEdgeModule, JETSON_PROFILES } from "./src/lib/jetsonEdgeModule";
 
 dotenv.config();
 setLogLevel("error");
 
-console.log("[CREDENTIALS DIAGNOSTICS]");
+// Credential status check without logging secret values or fingerprints
 const gKey = process.env.GEMINI_API_KEY;
-console.log(" - GEMINI_API_KEY:", gKey ? `CONFIGURED (${gKey.substring(0, 4)}...${gKey.slice(-4)})` : "MISSING");
+const nvidiaKey = process.env.NVIDIA_API_KEY;
+console.log("[CREDENTIALS STATUS]");
+console.log(" - GEMINI_API_KEY:", gKey ? "CONFIGURED" : "NOT_CONFIGURED");
+console.log(" - NVIDIA_API_KEY:", nvidiaKey ? "CONFIGURED" : "NOT_CONFIGURED");
 
 // ── FIRESTORE PERSISTENT STORAGE INITIALIZATION ──────────────────────────────
 let firebaseApp: any = null;
@@ -166,7 +172,7 @@ async function getTwinsList(): Promise<any[]> {
 }
 
 // Helper to save a twin
-async function saveTwin(twin: any): Promise<void> {
+async function saveTwin(twin: any): Promise<{ persistedToCloud: boolean; error?: string }> {
   const norm = normalizeTwinServer(twin);
   const idx = IN_MEMORY_TWINS.findIndex(t => t.id === norm.id);
   if (idx !== -1) {
@@ -181,23 +187,29 @@ async function saveTwin(twin: any): Promise<void> {
       const cleanData = JSON.parse(JSON.stringify(norm));
       await setDoc(doc(db, "twins", norm.id), cleanData);
       console.log("[FIREBASE] Twin stored/updated: ", norm.id);
-    } catch (e) {
+      return { persistedToCloud: true };
+    } catch (e: any) {
       console.error("[FIREBASE ERROR] failed to write twin to firestore: ", e);
+      return { persistedToCloud: false, error: e?.message || "Firestore write failure" };
     }
   }
+  return { persistedToCloud: false, error: "Cloud database not configured" };
 }
 
 // Helper to delete a twin
-async function removeTwin(id: string): Promise<void> {
+async function removeTwin(id: string): Promise<{ deletedFromCloud: boolean; error?: string }> {
   IN_MEMORY_TWINS = IN_MEMORY_TWINS.filter(t => t.id !== id);
   if (db) {
     try {
       await deleteDoc(doc(db, "twins", id));
       console.log("[FIREBASE] Twin deleted: ", id);
-    } catch (e) {
+      return { deletedFromCloud: true };
+    } catch (e: any) {
       console.error("[FIREBASE ERROR] failed to delete twin in firestore: ", e);
+      return { deletedFromCloud: false, error: e?.message || "Firestore delete failure" };
     }
   }
+  return { deletedFromCloud: false, error: "Cloud database not configured" };
 }
 
 // ── GIT REPOSITORY & ENVIRONMENT READ-ONLY INSPECTION ────────────────────────
@@ -205,37 +217,6 @@ import { exec } from "child_process";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
-
-const FALLBACK_COMMITS = [
-  {
-    hash: "pfd-c07",
-    author: "Pathfinder Operator",
-    email: "operator@pathfinder.local",
-    date: new Date().toISOString().split("T")[0],
-    message: "feat: Active Cognitive Decision Surface & Conjunctive Size–Charge Gate (5-Layer)"
-  },
-  {
-    hash: "pfd-c06",
-    author: "Pathfinder Operator",
-    email: "operator@pathfinder.local",
-    date: new Date().toISOString().split("T")[0],
-    message: "feat: Hybrid Threshold Attention Gate & Dual-Baseline signalToNoise() runtime"
-  },
-  {
-    hash: "pfd-c05",
-    author: "Pathfinder Operator",
-    email: "operator@pathfinder.local",
-    date: new Date().toISOString().split("T")[0],
-    message: "feat: Intelligent Protective Membrane 4-scale physical & electronic topology"
-  },
-  {
-    hash: "pfd-c01",
-    author: "Pathfinder Substrate",
-    email: "system@pathfinder.local",
-    date: new Date().toISOString().split("T")[0],
-    message: "chore: Pathfinder Digital Twin Substrate & Sovereign Operator Ledger initialized"
-  }
-];
 
 app.get("/api/git/status", async (req, res) => {
   try {
@@ -277,17 +258,10 @@ app.get("/api/git/status", async (req, res) => {
     if (logRaw && logRaw.trim()) {
       const [hash, author, date, message] = logRaw.split("|");
       lastCommit = {
-        hash: hash || "pfd-sub-01",
-        author: author || "Pathfinder Operator",
+        hash: hash || "workspace-head",
+        author: author || "Operator",
         date: date || new Date().toISOString(),
         message: message || "Pathfinder workspace active"
-      };
-    } else {
-      lastCommit = {
-        hash: FALLBACK_COMMITS[0].hash,
-        author: FALLBACK_COMMITS[0].author,
-        date: FALLBACK_COMMITS[0].date,
-        message: FALLBACK_COMMITS[0].message
       };
     }
 
@@ -301,27 +275,15 @@ app.get("/api/git/status", async (req, res) => {
       untrackedCount,
       stagedCount,
       statusRaw: statusRaw.trim(),
-      remotes: remotes.length > 0 ? remotes : [{ name: "origin", url: "pathfinder://local-twin-repository", type: "(fetch)" }],
+      remotes: remotes.length > 0 ? remotes : [{ name: "origin", url: "local://workspace", type: "(fetch)" }],
       lastCommit
     });
   } catch (err: any) {
-    return res.json({
-      success: true,
+    return res.status(500).json({
+      success: false,
       isNativeGit: false,
-      branch: "main",
-      clean: true,
-      changesCount: 0,
-      modifiedCount: 0,
-      untrackedCount: 0,
-      stagedCount: 0,
-      statusRaw: "",
-      remotes: [{ name: "origin", url: "pathfinder://local-twin-repository", type: "(fetch)" }],
-      lastCommit: {
-        hash: FALLBACK_COMMITS[0].hash,
-        author: FALLBACK_COMMITS[0].author,
-        date: FALLBACK_COMMITS[0].date,
-        message: FALLBACK_COMMITS[0].message
-      }
+      error: "GIT_INSPECTION_FAILED",
+      message: err?.message || "Failed to inspect git workspace"
     });
   }
 });
@@ -342,7 +304,7 @@ app.get("/api/git/logs", async (req, res) => {
       isNative = false;
     }
 
-    let commits = [];
+    let commits: any[] = [];
     if (isNative && stdout.trim()) {
       commits = stdout
         .trim()
@@ -354,20 +316,18 @@ app.get("/api/git/logs", async (req, res) => {
         });
     }
 
-    if (commits.length === 0) {
-      commits = FALLBACK_COMMITS.slice(0, limit);
-    }
-
     return res.json({
       success: true,
+      isNativeGit: isNative,
       commits,
       totalReturned: commits.length
     });
   } catch (err: any) {
-    return res.json({
-      success: true,
-      commits: FALLBACK_COMMITS,
-      totalReturned: FALLBACK_COMMITS.length
+    return res.status(500).json({
+      success: false,
+      isNativeGit: false,
+      error: "GIT_LOGS_FAILED",
+      message: err?.message || "Failed to retrieve git log history"
     });
   }
 });
@@ -392,16 +352,119 @@ app.get("/api/twins", async (req, res) => {
 app.post("/api/twins", async (req, res) => {
   const twin = req.body;
   if (!twin.id) {
-    return res.status(400).json({ error: "Missing required field: id" });
+    return res.status(400).json({ success: false, error: "Missing required field: id" });
   }
   twin.updatedAt = new Date().toISOString();
-  await saveTwin(twin);
-  res.json({ success: true, twin });
+  const saveResult = await saveTwin(twin);
+  res.json({
+    success: true,
+    twin,
+    persistedToCloud: saveResult.persistedToCloud,
+    cloudError: saveResult.error
+  });
 });
 
 app.delete("/api/twins/:id", async (req, res) => {
-  await removeTwin(req.params.id);
-  res.json({ success: true });
+  const delResult = await removeTwin(req.params.id);
+  res.json({
+    success: true,
+    id: req.params.id,
+    deletedFromCloud: delResult.deletedFromCloud,
+    cloudError: delResult.error
+  });
+});
+
+// ── NeMo SWITCHYARD CAPABILITY ROUTER ENDPOINT ──────────────────────────────
+app.post("/api/router/switchyard", (req, res) => {
+  const { taskType, twinDomain, complexityScore = 0.5, latencyBudgetMs = 50, costSensitivity = "BALANCED", requiredCapabilities = [] } = req.body;
+  
+  if (!taskType || !twinDomain) {
+    return res.status(400).json({
+      success: false,
+      error: "MISSING_SWITCHYARD_CRITERIA",
+      message: "taskType and twinDomain are required for NeMo Switchyard routing."
+    });
+  }
+
+  const decision = NeMoSwitchyardRouter.routeTask({
+    taskType,
+    twinDomain,
+    complexityScore,
+    latencyBudgetMs,
+    costSensitivity,
+    requiredCapabilities
+  });
+
+  return res.json({
+    success: true,
+    decision,
+    switchyardCatalog: SWITCHYARD_MODEL_CATALOG
+  });
+});
+
+// ── JETSON EDGE HARDWARE DISCOVERY & BENCHMARK ENDPOINTS ───────────────────
+app.get("/api/jetson/profiles", (req, res) => {
+  return res.json({
+    success: true,
+    profiles: Object.values(JETSON_PROFILES),
+    jetpackVersion: "JetPack 7.2.1"
+  });
+});
+
+app.post("/api/jetson/benchmark", (req, res) => {
+  const {
+    streamId = `stream-${Date.now().toString(36)}`,
+    sourceUri = "rtsp://edge-sensor.local/live",
+    resolution = { width: 1920, height: 1080 },
+    targetFps = 30,
+    codec = "H264",
+    aiPipeline = "OBJECT_DETECTION_YOLOV8",
+    requiredMaxLatencyMs = 25,
+    targetHardware = "JETSON_ORIN_NX_16GB"
+  } = req.body;
+
+  const receipt = JetsonEdgeModule.benchmarkAndInspectEdgePipeline({
+    streamId,
+    sourceUri,
+    resolution,
+    targetFps,
+    codec,
+    aiPipeline,
+    requiredMaxLatencyMs,
+    targetHardware
+  });
+
+  return res.json({
+    success: true,
+    receipt
+  });
+});
+
+// ── AWS DOGWOOD POLICY ENGINE ENDPOINT ───────────────────────────────────────
+app.post("/api/policy/dogwood/evaluate", (req, res) => {
+  const { targetAction, agentName = "System", twinId, proposedPayload = {}, eventHistory = [], operatorSignatureProvided = false } = req.body;
+
+  if (!targetAction || !twinId) {
+    return res.status(400).json({
+      success: false,
+      error: "MISSING_DOGWOOD_EVALUATION_CRITERIA",
+      message: "targetAction and twinId are required for Dogwood policy evaluation."
+    });
+  }
+
+  const verdict = DogwoodPolicyEngine.evaluatePolicy({
+    targetAction,
+    agentName,
+    twinId,
+    proposedPayload,
+    eventHistory,
+    operatorSignatureProvided
+  });
+
+  return res.json({
+    success: true,
+    verdict
+  });
 });
 
 // ── CAPABILITY REGISTRY ENDPOINTS ───────────────────────────────────────────
@@ -434,40 +497,10 @@ app.post("/api/digital-twins/discover-constraints", async (req, res) => {
 
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) {
-    return res.json({
-      success: true,
-      candidateConstraints: [
-        {
-          id: `cst-${Date.now()}-1`,
-          intention: intention || "Maintain operational equilibrium",
-          necessaryCondition: `Thermal and pressure permeability boundaries must remain within ±3.2% of baseline for ${domain} stability.`,
-          status: "unresolved",
-          evidenceRefs: existingObservations?.map((o: any) => o.id).slice(0, 2) || [],
-          falsificationTest: "Removal Test: Bypassing boundary limit causes non-recoverable thermal runaway within 14 cycles. Outcome fails -> MUST confirmed.",
-          isMustNotShould: true,
-          discoveredAt: new Date().toISOString(),
-          previousStateName: "State₀: Baseline Observation",
-          actionTaken: "Calibrate thermal boundary permeability & enforce active limits",
-          resultingStateName: "State₁: Calibrated Thermal Equilibrium",
-          resultingStateChange: "Thermal drift contained within ±0.4°C; integrity status upgraded to STABLE",
-          metricsDelta: { "Stability": "+28%", "Variance": "-75%" }
-        },
-        {
-          id: `cst-${Date.now()}-2`,
-          intention: intention || "Maintain operational equilibrium",
-          necessaryCondition: `Secondary auxiliary telemetry rate should be increased to 120Hz during peak transition windows.`,
-          status: "unresolved",
-          evidenceRefs: [],
-          falsificationTest: "Removal Test: Reverting to 60Hz telemetry maintains equilibrium; only reduces dashboard refresh smoothness. Outcome holds -> SHOULD reclassified.",
-          isMustNotShould: false,
-          discoveredAt: new Date().toISOString(),
-          previousStateName: "State₁: Calibrated Thermal Equilibrium",
-          actionTaken: "Increase sampling rate to 120Hz on auxiliary channel",
-          resultingStateName: "State₂: High-Frequency Telemetry Active",
-          resultingStateChange: "Dashboard refresh rate increased; zero impact on core physical stability",
-          metricsDelta: { "Telemetry Rate": "120Hz", "Core Impact": "None" }
-        }
-      ]
+    return res.status(503).json({
+      success: false,
+      error: "GEMINI_API_KEY_NOT_CONFIGURED",
+      message: "Gemini API key is required to execute cognitive constraint discovery. Substrate refuses to fabricate synthetic constraint evaluations."
     });
   }
 
@@ -517,27 +550,12 @@ Respond in JSON with format:
       success: true,
       candidateConstraints: parsed.candidateConstraints || []
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in constraint discovery:", err);
-    res.json({
-      success: true,
-      candidateConstraints: [
-        {
-          id: `cst-${Date.now()}-1`,
-          intention: intention || "Maintain operational equilibrium",
-          necessaryCondition: `Primary structural boundary permeability must enforce strict balance under ${domain} domain rules.`,
-          status: "unresolved",
-          evidenceRefs: [],
-          falsificationTest: "Falsification: Bypassing boundary enforcement causes systemic divergence. Confirmed MUST.",
-          isMustNotShould: true,
-          discoveredAt: new Date().toISOString(),
-          previousStateName: "State₀: Baseline State",
-          actionTaken: "Apply boundary permeability rules",
-          resultingStateName: "State₁: Enforced Boundary Equilibrium",
-          resultingStateChange: "System stability restored to baseline operating parameters",
-          metricsDelta: { "Stability": "+15%" }
-        }
-      ]
+    return res.status(500).json({
+      success: false,
+      error: "CONSTRAINT_DISCOVERY_FAILED",
+      message: err?.message || "Constraint discovery failed to complete."
     });
   }
 });
@@ -1547,8 +1565,7 @@ app.get("/api/keys/validate", async (req, res) => {
           valid: true,
           trustState: "APPROVED",
           role: "Cognition & Framing Layer",
-          message: "Gemini API Key is valid and operational (Cognition & Framing Layer).",
-          preview: `${geminiKey.substring(0, 4)}...${geminiKey.slice(-4)}`
+          message: "Gemini API Key is valid and operational (Cognition & Framing Layer)."
         };
       } else {
         results.gemini = { configured: true, valid: false, trustState: "APPROVED", role: "Cognition & Framing Layer", message: "Gemini API returned an empty response." };
@@ -1578,8 +1595,7 @@ app.get("/api/keys/validate", async (req, res) => {
           valid: true,
           trustState: "APPROVED",
           role: "Primary Accelerated Compute Rail",
-          message: "NVIDIA NIM Accelerated Compute Rail is valid and operational.",
-          preview: `${nvidiaKey.substring(0, 4)}...${nvidiaKey.slice(-4)}`
+          message: "NVIDIA NIM Accelerated Compute Rail is valid and operational."
         };
       } else {
         const errText = await resp.text();

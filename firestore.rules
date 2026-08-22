@@ -5,23 +5,23 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    match /test/{testId} {
-      allow read, write: if true;
+    function isValidTwin(data) {
+      return data.id is string
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 256
+        && data.domain is string;
     }
 
     match /twins/{twinId} {
       allow read: if true;
-      allow create, update: if isValidId(twinId)
-        && request.resource.data.id is string
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0;
+      allow create, update: if isValidId(twinId) && isValidTwin(request.resource.data);
       allow delete: if isValidId(twinId);
     }
 
-    // Default deny
+    // Default deny all other paths
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
-

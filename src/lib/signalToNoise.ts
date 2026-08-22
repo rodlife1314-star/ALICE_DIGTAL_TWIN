@@ -39,6 +39,7 @@ export interface DualBaselineState {
   cycleCount: number;            // Total deformation or load cycles
   effectiveNoiseFloor: number;   // N_effective = min(N_adaptive, N_max)
   maxPermittedNoiseFloor: number;// Hard ceiling for noise floor widening
+  cumulativeDeviation?: number;  // Cumulative drift deviation from initial calibration
 }
 
 export interface AttentionGateConfig {
@@ -119,6 +120,31 @@ export const DEFAULT_ATTENTION_CONFIG: AttentionGateConfig = {
   hysteresisAlarmThreshold: 0.32
 };
 
+export function createDefaultDualBaselineState(initialReading: number = 0.5): DualBaselineState {
+  return {
+    fastBaseline: initialReading,
+    slowBaseline: initialReading,
+    instantaneousResidual: 0.0,
+    ageingResidual: 0.0,
+    driftVelocity: 0.0,
+    hysteresis: 0.0,
+    recoveryTimeMs: 45.0,
+    cumulativeDeviation: 0.0,
+    cycleCount: 0,
+    effectiveNoiseFloor: 0.04,
+    maxPermittedNoiseFloor: 0.18
+  };
+}
+
+export function createDefaultAccumulator(driftThreshold: number = 0.65, windowSize: number = 20): CumulativeDriftAccumulator {
+  return {
+    cumulativeStateDelta: 0.0,
+    samples: [],
+    windowSize,
+    driftThreshold
+  };
+}
+
 /**
  * Calculates Candidate Score for non-actinide surrogate screening
  * candidateScore = (electronicCouplingDensity * perturbationSensitivity * signalSeparability * environmentalStability) / readoutCost
@@ -147,8 +173,8 @@ export function evaluateSignalToNoise(
   signal: SignalInput,
   operatingMode: string = "active_telemetry",
   systemLoad: number = 0.2, // L: 0.0 to 1.0
-  dualBaseline: DualBaselineState,
-  accumulator: CumulativeDriftAccumulator,
+  dualBaseline: DualBaselineState = createDefaultDualBaselineState(signal.amplitude || 0.5),
+  accumulator: CumulativeDriftAccumulator = createDefaultAccumulator(),
   config: AttentionGateConfig = DEFAULT_ATTENTION_CONFIG
 ): SignalEvaluationResult {
   // ── LAYER 1: INVARIANT FLOOR (FIXED) ───────────────────────────────────────
