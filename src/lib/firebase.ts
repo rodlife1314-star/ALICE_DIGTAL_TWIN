@@ -1,12 +1,21 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+import rawFirebaseConfig from '../../firebase-applet-config.json';
 
-const app = initializeApp(firebaseConfig);
+const clientApiKey = ((import.meta as any).env?.VITE_FIREBASE_API_KEY as string | undefined) || rawFirebaseConfig.apiKey || '';
 
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const auth = getAuth(app);
+const effectiveConfig = {
+  ...rawFirebaseConfig,
+  apiKey: clientApiKey
+};
+
+const app = clientApiKey && getApps().length === 0
+  ? initializeApp(effectiveConfig)
+  : (getApps()[0] || null);
+
+export const db = app ? getFirestore(app, effectiveConfig.firestoreDatabaseId) : (null as any);
+export const auth = app ? getAuth(app) : (null as any);
 export const googleProvider = new GoogleAuthProvider();
 
 export enum OperationType {
@@ -47,6 +56,10 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 }
 
 export async function testConnection() {
+  if (!db) {
+    console.log('[FIREBASE] Client Firestore offline mode active (no apiKey configured).');
+    return;
+  }
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
     console.log('Firebase connection verified.');

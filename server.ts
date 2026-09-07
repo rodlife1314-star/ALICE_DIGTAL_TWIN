@@ -16,6 +16,11 @@ import { DogwoodPolicyEngine } from "./src/lib/dogwoodPolicyEngine";
 import { JetsonEdgeModule, JETSON_PROFILES } from "./src/lib/jetsonEdgeModule";
 import { synthesizeSimonMeaning, auditSimonEnvelope } from "./src/lib/simon";
 import { executeJemmaComputerAudit, JEMMA_GROUND_TRUTH_CATALOG } from "./src/lib/jemmaRail";
+import {
+  executeOpenAIReasoning,
+  getOpenAIProviderStatus,
+  OPENAI_PROVIDER_CONFIG
+} from "./src/lib/openaiReasoningProvider";
 
 dotenv.config();
 setLogLevel("error");
@@ -23,9 +28,12 @@ setLogLevel("error");
 // Credential status check without logging secret values or fingerprints
 const gKey = process.env.GEMINI_API_KEY;
 const nvidiaKey = process.env.NVIDIA_API_KEY;
+const openaiKey = process.env.OPENAI_API_KEY;
 console.log("[CREDENTIALS STATUS]");
 console.log(" - GEMINI_API_KEY:", gKey ? "CONFIGURED" : "NOT_CONFIGURED");
 console.log(" - NVIDIA_API_KEY:", nvidiaKey ? "CONFIGURED" : "NOT_CONFIGURED");
+console.log(" - OPENAI_API_KEY:", openaiKey ? "CONFIGURED" : "NOT_CONFIGURED");
+console.log(" - OPENAI_MODEL:", OPENAI_PROVIDER_CONFIG.getModel());
 
 // ── FIRESTORE PERSISTENT STORAGE INITIALIZATION ──────────────────────────────
 let firebaseApp: any = null;
@@ -36,21 +44,28 @@ try {
   if (fs.existsSync(configPath)) {
     const raw = fs.readFileSync(configPath, "utf-8");
     const firebaseConfig = JSON.parse(raw);
+    if (process.env.FIREBASE_API_KEY) {
+      firebaseConfig.apiKey = process.env.FIREBASE_API_KEY;
+    }
     
-    firebaseApp = initFirebase(firebaseConfig);
-    db = initFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId || "(default)");
-    console.log("[FIREBASE] Initialized successfully. DatabaseId:", firebaseConfig.firestoreDatabaseId);
+    if (firebaseConfig.apiKey) {
+      firebaseApp = initFirebase(firebaseConfig);
+      db = initFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId || "(default)");
+      console.log("[FIREBASE] Initialized successfully. DatabaseId:", firebaseConfig.firestoreDatabaseId);
 
-    // Validate connection
-    const testConnection = async () => {
-      try {
-        await getDocs(collection(db, "twins"));
-        console.log("[FIREBASE] Connection validated with server.");
-      } catch (err: any) {
-        console.log("[FIREBASE] Cloud persistence channel opened successfully.");
-      }
-    };
-    testConnection();
+      // Validate connection
+      const testConnection = async () => {
+        try {
+          await getDocs(collection(db, "twins"));
+          console.log("[FIREBASE] Connection validated with server.");
+        } catch (err: any) {
+          console.log("[FIREBASE] Cloud persistence channel opened successfully.");
+        }
+      };
+      testConnection();
+    } else {
+      console.log("[FIREBASE] No apiKey configured in config or environment. In-memory local state fallback active.");
+    }
   } else {
     console.warn("[FIREBASE] Config file not found inside server.ts - fallback mode active");
   }
@@ -1270,60 +1285,62 @@ app.post("/api/agents/epistemic-loop", async (req, res) => {
   const geminiKey = process.env.GEMINI_API_KEY;
 
   if (!geminiKey) {
-    return res.json({
-      success: true,
+    return res.status(503).json({
+      success: false,
+      status: "MODEL_UNAVAILABLE",
+      message: "No frontier reasoning model connected. GEMINI_API_KEY is not configured. In accordance with Pathfinder doctrine, the agent loop refuses to invent measurements, fabricate confidence metrics, or report false audit passes.",
       evaluations: [
         {
           agentName: "Alice",
           questionAsked: `Given intention '${operatorIntention}', what question MUST Pathfinder ask now?`,
-          agentClaim: `Alice: Formulated Question: "For intention '${operatorIntention}' to hold, what condition MUST become true next that is not true now?"`,
-          supportingEvidenceRefs: ["Twin Boundary Membrane"],
-          passedGovernanceCheck: true,
-          operatorApprovalRequired: false,
+          agentClaim: `[UNAVAILABLE] Alice (Question-Framing Role): Frontier reasoning model is disconnected. Cannot formulate grounded epistemic questions.`,
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
           timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
         },
         {
           agentName: "Astra",
           questionAsked: "What is current state, and where does expected differ from observed?",
-          agentClaim: `Astra: State baseline for ${twinName} indicates structural balance is stable, with ±2.1% drift tolerance required.`,
-          supportingEvidenceRefs: ["State Node 01"],
-          passedGovernanceCheck: true,
-          operatorApprovalRequired: false,
+          agentClaim: `[UNAVAILABLE] Astra (State-Model Role): State continuity analysis suspended. Cannot calculate divergence without active compute substrate.`,
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
           timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
         },
         {
           agentName: "Jemma",
           questionAsked: "What can we actually support with evidence? What is assumed or unknown?",
-          agentClaim: `Jemma: Provenance verified across all active observations. Confidence: 95.8%. Zero ungrounded assumptions.`,
-          supportingEvidenceRefs: ["Evidence Log ev-102"],
-          passedGovernanceCheck: true,
-          operatorApprovalRequired: false,
+          agentClaim: `[UNAVAILABLE - FAIL CLOSED] Jemma: Evidence validation offline. Cannot attest provenance, audit boundaries, or generate confidence scores. Zero fabricated claims.`,
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
           timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
         },
         {
           agentName: "Orion",
           questionAsked: "If we remove this condition, does the path collapse? Is this a genuine MUST?",
-          agentClaim: `Orion: Counterfactual Test passed. Removing boundary constraint permits trajectory to escape admissible region S. Verdict: BINDING MUST.`,
-          supportingEvidenceRefs: ["Counterfactual Run sim-901"],
-          passedGovernanceCheck: true,
-          operatorApprovalRequired: false,
+          agentClaim: `[UNAVAILABLE] Orion: Counterfactual ablation test halted. Cannot verify binding MUST constraints in disconnected state.`,
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
           timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
         },
         {
           agentName: "Claudia",
           questionAsked: "What model, tool, runtime or compute fabric is capable of resolving this constraint?",
-          agentClaim: `Claudia: Allocated Local GPU Substrate with Gemini Reasoning Core fallback. Latency: 14ms. Trust Score: 96%.`,
-          supportingEvidenceRefs: ["Capability Registry"],
-          passedGovernanceCheck: true,
-          operatorApprovalRequired: false,
+          agentClaim: `[UNAVAILABLE] Claudia: Capability router reports zero active frontier model backends connected. Operator configuration required.`,
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
           timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
         },
         {
           agentName: "Natalia",
           questionAsked: "Are we inside the authorized boundary? Do any of the 10 Stop Conditions apply?",
-          agentClaim: `Natalia: Verified 10 Stop Conditions. Governance boundaries satisfied. Halting at Operator Gate for final authorization.`,
-          supportingEvidenceRefs: ["Governance Ruleset"],
-          passedGovernanceCheck: true,
+          agentClaim: `[STOP CONDITION TRIGGERED] Natalia: Stop Condition 1 triggered (No model connected). Execution halted at Operator Gate.`,
+          supportingEvidenceRefs: ["Stop Condition 1: Model Disconnected"],
+          passedGovernanceCheck: false,
           operatorApprovalRequired: true,
           timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
         }
@@ -2379,9 +2396,101 @@ app.post("/api/reasoning-rail/execute", async (req, res) => {
   let tokenUsage = { prompt: 420, completion: 280, total: 700 };
   let estimatedCost = 0.00015;
 
+  // Branch 1: OpenAI Reasoning Rail (Bound to SIMON with JEMMA audit & Octagon boundary)
+  if (preferredEngineId === "openai-provider" || preferredEngineId === "openai") {
+    const evidenceBundle = {
+      query: question,
+      objective: `Reasoning Task: ${task} (Mode: ${reasoningMode})`,
+      observations: evidenceRefs.length > 0 ? evidenceRefs : [`Query aperture: ${JSON.stringify(aperture)}`],
+      measured: evidencePayload?.measured || {},
+      derived: evidencePayload?.derived || {},
+      inferred: evidencePayload?.inferred || {},
+      provenance: {
+        source: "Pathfinder Reasoning Rail Operator Request",
+        timestamp: new Date().toISOString(),
+        verification_level: "VERIFIED" as const,
+        hash: requestHash
+      },
+      evidence_refs: evidenceRefs,
+      constraints: [
+        permittedExternalKnowledge ? "PERMITTED_EXTERNAL_KNOWLEDGE" : "CLOSED_WORLD_EVIDENCE_ONLY",
+        `REASONING_MODE_${reasoningMode}`
+      ],
+      current_state: evidencePayload?.currentState || {},
+      uncertainties: ["Model inference is advisory only; unverified empirical bounds remain active."]
+    };
+
+    const openaiReceipt = await executeOpenAIReasoning(evidenceBundle);
+
+    if (!openaiReceipt.success || !openaiReceipt.simon_interpretation) {
+      // In accordance with Section 12: Return genuine degraded/unavailable state without synthetic disguise
+      return res.status(openaiReceipt.state === "UNAVAILABLE" ? 503 : 200).json({
+        success: false,
+        receipt: {
+          engineId: "openai-provider",
+          modelId: openaiReceipt.model,
+          reasoningMode,
+          permittedExternalKnowledge,
+          requestHash,
+          responseHash: openaiReceipt.response_hash,
+          latencyMs: openaiReceipt.latency_ms,
+          state: openaiReceipt.state,
+          error: openaiReceipt.error,
+          jemma_audit: openaiReceipt.jemma_audit,
+          octagon_boundary: openaiReceipt.octagon_boundary,
+          assertions: [],
+          quadSteps: [],
+          rawSynthesis: openaiReceipt.error?.message || "OpenAI reasoning execution degraded or unavailable.",
+          inferredByDefault: true as const,
+          invariantAttestation: "Reasoning capability does not equal epistemic authority." as const,
+          timestamp: openaiReceipt.timestamp
+        }
+      });
+    }
+
+    const interp = openaiReceipt.simon_interpretation;
+    rawSynthesis = interp.summary;
+    modelIdentifier = openaiReceipt.model;
+    estimatedCost = 0.0003;
+    tokenUsage = {
+      prompt: openaiReceipt.token_usage?.prompt_tokens || 450,
+      completion: openaiReceipt.token_usage?.completion_tokens || 320,
+      total: openaiReceipt.token_usage?.total_tokens || 770
+    };
+
+    assertions = [
+      ...interp.interpretations.map((stmt, idx) => ({
+        statement: stmt,
+        epistemicClass: "INFERRED" as const,
+        evidenceRefs: interp.evidence_links.length > 0 ? interp.evidence_links : evidenceRefs,
+        domainPrinciples: ["SIMON semantic interpretation over declared evidence aperture."],
+        alternatives: interp.alternative_explanations,
+        uncertainty: interp.uncertainties[idx] || interp.uncertainties[0] || "Epistemic bounds under active evaluation.",
+        boundary: interp.contradictions[idx] || "Advisory interpretation; cannot authorize actions or alter authoritative state."
+      })),
+      ...interp.hypotheses.map(hyp => ({
+        statement: hyp,
+        epistemicClass: "HYPOTHESIZED" as const,
+        evidenceRefs: evidenceRefs,
+        domainPrinciples: ["Falsifiable candidate hypothesis requiring interventional test."],
+        alternatives: interp.alternative_explanations,
+        uncertainty: "Requires downstream empirical validation.",
+        boundary: "Hypothesis only; does not establish causality without interventional knockout."
+      }))
+    ];
+
+    quadSteps = interp.interpretations.map((stmt, idx) => ({
+      evidence: interp.observations[idx] || interp.observations[0] || (evidenceRefs[0] || "Supplied evidence bundle"),
+      domainPrinciple: "Epistemic bounding & advisory semantic framing",
+      interpretation: stmt,
+      boundary: interp.uncertainties[idx] || "Advisory only; never sovereign authority.",
+      epistemicClass: "INFERRED" as const
+    }));
+  }
+
   const geminiKey = process.env.GEMINI_API_KEY;
 
-  if (geminiKey && preferredEngineId !== "local-deterministic-mock") {
+  if (!assertions.length && geminiKey && preferredEngineId !== "local-deterministic-mock" && preferredEngineId !== "openai-provider" && preferredEngineId !== "openai") {
     try {
       const ai = new GoogleGenAI({ apiKey: geminiKey });
       const prompt = `You are the Pathfinder Governed Reasoning Rail Engine.
@@ -2651,6 +2760,28 @@ Respond strictly with valid JSON conforming to:
     success: true,
     receipt
   });
+});
+
+// ── OPENAI REASONING RAIL & SIMON MEANING ENGINE ENDPOINTS ───────────────────
+app.get("/api/reasoning/provider-status", (req, res) => {
+  const status = getOpenAIProviderStatus();
+  res.json(status);
+});
+
+app.post("/api/reasoning/simon", async (req, res) => {
+  try {
+    const rawBundle = req.body;
+    const receipt = await executeOpenAIReasoning(rawBundle);
+    res.json(receipt);
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "INTERNAL_REASONING_FAULT",
+        message: err.message || "Failed to process reasoning request"
+      }
+    });
+  }
 });
 
 

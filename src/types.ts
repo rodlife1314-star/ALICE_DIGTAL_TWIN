@@ -297,7 +297,7 @@ export interface HardwareRequirement {
 export interface ModelCapability {
   id: string; // Model identifier, e.g. "gemini-3.5-flash", "nvidia-llama3-70b", "local-mistral-7b"
   name: string;
-  provider: "Google AI Studio" | "NVIDIA NIM" | "Open-Source Runtime" | "Local Edge Runtime" | "Custom Deterministic Engine" | "FPT Neural (Revoked)";
+  provider: "Google AI Studio" | "NVIDIA NIM" | "Open-Source Runtime" | "Local Edge Runtime" | "Custom Deterministic Engine" | "FPT Neural (Revoked)" | "OpenAI";
   trustState?: RailTrustState;
   latencyMs: {
     avgMs: number;
@@ -316,6 +316,9 @@ export interface ModelCapability {
     | "high_precision"
     | "edge_offline"
     | "deterministic"
+    | "advisory_reasoning"
+    | "semantic_interpretation"
+    | "hypothesis_generation"
   >;
   costPer1kTokens?: number;
   maxContextTokens?: number;

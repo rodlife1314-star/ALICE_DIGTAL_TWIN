@@ -8,6 +8,13 @@ import { MembraneSpatialAdapter } from "../spatial/adapters/MembraneSpatialAdapt
 import { DigitalTwin } from "../types";
 import { JetsonEdgeModule, JETSON_PROFILES } from "./jetsonEdgeModule";
 import { JEMMA_GROUND_TRUTH_CATALOG, executeJemmaComputerAudit } from "./jemmaRail";
+import {
+  validateEvidenceBundle,
+  runJemmaEpistemicAudit,
+  enforceOctagonBoundary,
+  getOpenAIProviderStatus,
+  OPENAI_PROVIDER_CONFIG
+} from "./openaiReasoningProvider";
 
 console.log("==================================================================");
 console.log("    PATHFINDER DIGITAL TWIN SUBSTRATE — INVARIANT TEST SUITE     ");
@@ -497,6 +504,81 @@ assert(superluminalCmeAudit.evaluatedRules.some(r => !r.passed && r.ruleId === "
 
 // Test 6: Operator sovereign ledger notice is present in all receipts
 assert(nominalSstAudit.operatorNotice.includes("Sovereign operator") || nominalSstAudit.operatorNotice.includes("state ledger"), "JEMMA receipts preserve sovereign operator authority notice");
+
+// ── TEST GROUP 11: OPENAI REASONING RAIL & SIMON MEANING INVARIANTS ─────────
+console.log("\n[TEST GROUP 11: OpenAI Reasoning Rail & SIMON Meaning Invariants]");
+
+// Test 1: Fail-closed validation rejects unverified provenance
+const unverifiedBundleCheck = validateEvidenceBundle({
+  query: "Synthesize meaning without evidence",
+  objective: "Fabricate ungrounded data",
+  observations: [],
+  provenance: { source: "unverified", timestamp: new Date().toISOString(), verification_level: "UNVERIFIED" as any }
+});
+assert(unverifiedBundleCheck.isValid === false, "validateEvidenceBundle rejects UNVERIFIED provenance");
+assert(unverifiedBundleCheck.errors.some(e => e.includes("FAIL_CLOSED")), "Failure includes explicit FAIL_CLOSED directive");
+
+// Test 2: Fail-closed validation accepts verified evidence bundle with observations
+const validBundleCheck = validateEvidenceBundle({
+  query: "Does 38T vs 39T mesh produce kinematic interference?",
+  objective: "Analyze kinematic gear mesh with exact rational teeth",
+  observations: ["Nominal gear: 38 teeth", "Perturbed gear: 39 teeth", "Center displacement: 0.25mm"],
+  provenance: { source: "Deterministic Kinematics Substrate", timestamp: new Date().toISOString(), verification_level: "VERIFIED" }
+});
+assert(validBundleCheck.isValid === true, "validateEvidenceBundle approves VERIFIED evidence bundle with observations");
+
+// Test 3: JEMMA Epistemic Audit detects forbidden causal predicates
+const openaiCausalAudit = runJemmaEpistemicAudit({
+  summary: "The tooth mismatch definitively causes binding and proves rotational failure.",
+  observations: ["Nominal 38T vs 39T mismatch"],
+  interpretations: ["This parameter discrepancy triggers severe binding."],
+  hypotheses: ["Perturbation alters the rational ratio departure."],
+  evidence_links: ["Nominal 38T vs 39T mismatch"],
+  epistemic_status: "INFERRED",
+  confidence: { level: "HIGH", basis: "Observational hypothesis" },
+  uncertainties: ["Assumes rigid body without thermal expansion."],
+  alternative_explanations: ["Flexible gear teeth deflection."],
+  contradictions: [],
+  recommended_next_measurements: [],
+  operator_questions: []
+});
+assert(openaiCausalAudit.verdict === "JEMMA_FAIL", "JEMMA audit fails on forbidden causal predicates");
+assert(openaiCausalAudit.forbidden_causal_predicates_detected.length > 0, "JEMMA catches detected causal predicates (causes/proves)");
+
+// Test 4: JEMMA Epistemic Audit rejects authority category masquerade (MEASURED / DERIVED claims)
+const openaiMasqueradeAudit = runJemmaEpistemicAudit({
+  summary: "Advisory interpretation claiming measured reality status.",
+  observations: ["Nominal 38T vs 39T mismatch"],
+  interpretations: ["Discrepancy is observed."],
+  hypotheses: ["Ratio departure hypothesis."],
+  evidence_links: ["Nominal 38T vs 39T mismatch"],
+  epistemic_status: "MEASURED" as any, // Forbidden masquerade
+  confidence: { level: "HIGH", basis: "Unfounded certainty claim" },
+  uncertainties: ["Uncertainty stated."],
+  alternative_explanations: ["Alternative hypothesis."],
+  contradictions: [],
+  recommended_next_measurements: [],
+  operator_questions: []
+});
+assert(openaiMasqueradeAudit.verdict === "JEMMA_FAIL", "JEMMA audit rejects MEASURED epistemic classification from reasoning engine");
+assert(openaiMasqueradeAudit.category_masquerade_detected === true, "JEMMA flags category masquerade violation");
+
+// Test 5: Octagon Governance Boundary strictly enforces advisory authority
+const octagonBoundary = enforceOctagonBoundary();
+assert(octagonBoundary.authority === "ADVISORY", "Octagon enforces strictly ADVISORY authority on reasoning rail");
+assert(octagonBoundary.operator_approval_required === true, "Octagon requires explicit operator approval gate");
+assert(octagonBoundary.state_modification_permitted === false, "Octagon forbids state modification by reasoning engine");
+assert(octagonBoundary.autonomous_commit_permitted === false, "Octagon forbids autonomous action commits");
+assert(octagonBoundary.operator_gate_status === "PENDING_OPERATOR_AUTHORIZATION", "Operator gate is PENDING_OPERATOR_AUTHORIZATION by default");
+
+// Test 6: Provider Status surface presents full metadata without leaking credentials
+const providerStatus = getOpenAIProviderStatus();
+assert(providerStatus.provider_id === "openai", "Provider status identifies provider as openai");
+assert(providerStatus.authority === "ADVISORY", "Provider status attests ADVISORY authority");
+assert(providerStatus.bound_to === "SIMON", "Provider status confirms bound strictly to SIMON");
+assert(providerStatus.audit === "JEMMA", "Provider status confirms JEMMA audit rail");
+assert(providerStatus.policy_boundary === "OCTAGON", "Provider status confirms OCTAGON policy boundary");
+assert(!("key" in providerStatus) && !("apiKey" in providerStatus) && !("secret" in providerStatus), "Provider status never leaks API key or secret properties");
 
 // ── TEST SUITE SUMMARY ───────────────────────────────────────────────────────
 console.log("\n==================================================================");

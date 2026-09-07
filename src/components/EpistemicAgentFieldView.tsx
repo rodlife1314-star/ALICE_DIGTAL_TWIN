@@ -36,9 +36,9 @@ const DEFAULT_AGENTS: EpistemicAgent[] = [
   {
     id: "agent-alice",
     name: "Alice",
-    role: "Selector & Question Framer",
+    role: "Question-Framing Role & Selector",
     epistemicQuestion: "Given intention, what question MUST Pathfinder ask now?",
-    domainScope: "Intent framing, aperture selection & necessary condition formulation",
+    domainScope: "Question-framing role: Formulates what condition MUST become true next given operator intention",
     isCoreSovereignLoop: true,
     activeStatus: "IDLE",
     avatarColor: "#3B82F6"
@@ -46,9 +46,9 @@ const DEFAULT_AGENTS: EpistemicAgent[] = [
   {
     id: "agent-astra",
     name: "Astra",
-    role: "State Model & Continuity Engine",
+    role: "State-Model & Continuity Role",
     epistemicQuestion: "What is the current state, and where does expected differ from observed?",
-    domainScope: "State baseline tracking, discrepancy detection & timeline evolution",
+    domainScope: "State-model role (Internal continuity engine, not OpenAI Astra): Tracks state baseline and observed divergence",
     isCoreSovereignLoop: true,
     activeStatus: "IDLE",
     avatarColor: "#8B5CF6"
@@ -58,7 +58,7 @@ const DEFAULT_AGENTS: EpistemicAgent[] = [
     name: "Jemma",
     role: "Evidence & Provenance Validator",
     epistemicQuestion: "What can we actually support with evidence? What is assumed or unknown?",
-    domainScope: "Evidence provenance, confidence scoring & contradiction auditing",
+    domainScope: "Evidence provenance, empirical grounding & contradiction auditing (Fails closed when disconnected)",
     isCoreSovereignLoop: true,
     activeStatus: "IDLE",
     avatarColor: "#10B981"
@@ -188,14 +188,20 @@ export function EpistemicAgentFieldView({ twin, onUpdateTwin }: EpistemicAgentFi
     targetState: string;
   } | null>(null);
 
+  const [modelStatusNotice, setModelStatusNotice] = useState<{
+    type: "unavailable" | "connected" | "error";
+    message: string;
+  } | null>(null);
+
   const handleRunMultiAgentLoop = async () => {
     if (!targetIntention.trim()) return;
 
     setIsExecutingLoop(true);
     setCurrentExecutingAgentIndex(0);
     setSimulatedDiscoveryOutcome(null);
+    setModelStatusNotice(null);
 
-    // Try fetching live server epistemic evaluations if available
+    // Live server epistemic evaluations
     try {
       const resp = await fetch("/api/agents/epistemic-loop", {
         method: "POST",
@@ -208,108 +214,102 @@ export function EpistemicAgentFieldView({ twin, onUpdateTwin }: EpistemicAgentFi
       });
 
       const data = await resp.json();
-      if (data.success && Array.isArray(data.evaluations) && data.evaluations.length > 0) {
-        setEvaluations((prev) => [...data.evaluations, ...prev]);
+
+      if (resp.status === 503 || data.status === "MODEL_UNAVAILABLE" || !data.success) {
+        // Explicit UNAVAILABLE state - strictly adhere to doctrine: never invent measurements or fake audit passes
+        setIsExecutingLoop(false);
+        setCurrentExecutingAgentIndex(null);
+        setAgents(DEFAULT_AGENTS);
+        setModelStatusNotice({
+          type: "unavailable",
+          message: data.message || "Model Unavailable: No frontier reasoning model connected. Pathfinder doctrine strictly forbids inventing measurements, confidence scores, or fake audit passes when disconnected."
+        });
+        if (Array.isArray(data.evaluations) && data.evaluations.length > 0) {
+          setEvaluations((prev) => [...data.evaluations, ...prev]);
+        }
+        return;
       }
-    } catch (e) {
-      console.warn("Server epistemic loop endpoint warning, fallback to client sequence:", e);
+
+      if (data.success && Array.isArray(data.evaluations) && data.evaluations.length > 0) {
+        // Genuine model execution response
+        setEvaluations((prev) => [...data.evaluations, ...prev]);
+        setModelStatusNotice({
+          type: "connected",
+          message: "Epistemic multi-agent evaluation completed successfully via connected frontier reasoning core."
+        });
+        setIsExecutingLoop(false);
+        setCurrentExecutingAgentIndex(null);
+        return;
+      }
+    } catch (e: any) {
+      console.warn("Server epistemic loop endpoint warning:", e);
+      setIsExecutingLoop(false);
+      setCurrentExecutingAgentIndex(null);
+      setAgents(DEFAULT_AGENTS);
+      setModelStatusNotice({
+        type: "error",
+        message: "Endpoint unreachable or disconnected. In adherence to Pathfinder doctrine, audits and measurements cannot be fabricated without an active reasoning substrate."
+      });
+
+      const disconnectedTimestamp = new Date().toISOString().replace("T", " ").substring(0, 16);
+      const disconnectedEvals: AgentConstraintEvaluation[] = [
+        {
+          agentName: "Alice",
+          questionAsked: `Given intention '${targetIntention}', what question MUST Pathfinder ask now?`,
+          agentClaim: "[UNAVAILABLE] Alice (Question-Framing Role): Disconnected from reasoning backend. Epistemic questioning suspended.",
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
+          timestamp: disconnectedTimestamp
+        },
+        {
+          agentName: "Astra",
+          questionAsked: "What is current state, and where does expected differ from observed?",
+          agentClaim: "[UNAVAILABLE] Astra (State-Model Role): Disconnected from computation. Discrepancy analysis unavailable.",
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
+          timestamp: disconnectedTimestamp
+        },
+        {
+          agentName: "Jemma",
+          questionAsked: "What can we actually support with evidence? What is assumed or unknown?",
+          agentClaim: "[UNAVAILABLE - FAIL CLOSED] Jemma: Evidence audit offline. Refusing to invent measurements or fake verification passes.",
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
+          timestamp: disconnectedTimestamp
+        },
+        {
+          agentName: "Orion",
+          questionAsked: "If we remove this condition, does the path collapse? Is this a genuine MUST?",
+          agentClaim: "[UNAVAILABLE] Orion: Counterfactual ablation halted. Cannot evaluate necessity without compute.",
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
+          timestamp: disconnectedTimestamp
+        },
+        {
+          agentName: "Claudia",
+          questionAsked: "What model, tool, runtime or compute fabric is capable of resolving this constraint?",
+          agentClaim: "[UNAVAILABLE] Claudia: Zero connected compute fabrics detected.",
+          supportingEvidenceRefs: [],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
+          timestamp: disconnectedTimestamp
+        },
+        {
+          agentName: "Natalia",
+          questionAsked: "Are we inside the authorized boundary? Do any of the 10 Stop Conditions apply?",
+          agentClaim: "[STOP CONDITION TRIGGERED] Natalia: Stop Condition 1: Disconnected reasoning substrate. Execution halted at Operator Gate.",
+          supportingEvidenceRefs: ["Stop Condition 1: Substrate Disconnected"],
+          passedGovernanceCheck: false,
+          operatorApprovalRequired: true,
+          timestamp: disconnectedTimestamp
+        }
+      ];
+      setEvaluations((prev) => [...disconnectedEvals, ...prev]);
     }
-
-    const coreSequence: EpistemicAgentName[] = ["Alice", "Astra", "Jemma", "Orion", "Claudia", "Natalia"];
-
-    coreSequence.forEach((agentName, idx) => {
-      setTimeout(() => {
-        setCurrentExecutingAgentIndex(idx);
-
-        // Update agent status
-        setAgents((prev) =>
-          prev.map((a) =>
-            a.name === agentName
-              ? { ...a, activeStatus: agentName === "Alice" ? "ASKING" : agentName === "Orion" ? "CHALLENGING" : agentName === "Natalia" ? "STOP_CHECK" : "VALIDATING" }
-              : { ...a, activeStatus: "IDLE" }
-          )
-        );
-
-        let newEval: AgentConstraintEvaluation;
-        if (agentName === "Alice") {
-          newEval = {
-            agentName: "Alice",
-            questionAsked: `Given intention '${targetIntention}', what question MUST Pathfinder ask now?`,
-            agentClaim: `Alice: Formulated Question: "For intention '${targetIntention}' to exist, what condition MUST become true next that is not true now?"`,
-            supportingEvidenceRefs: [twin.boundary?.description || "Twin Boundary Membrane"],
-            passedGovernanceCheck: true,
-            operatorApprovalRequired: false,
-            timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-          };
-        } else if (agentName === "Astra") {
-          newEval = {
-            agentName: "Astra",
-            questionAsked: "What is current state, and where does expected differ from observed?",
-            agentClaim: `Astra: State analysis for ${twin.name} indicates structural baseline is STABLE, but drift tolerance requires dynamic threshold stabilization.`,
-            supportingEvidenceRefs: twin.states?.[0]?.id ? [twin.states[0].id] : ["State Baseline 0"],
-            passedGovernanceCheck: true,
-            operatorApprovalRequired: false,
-            timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-          };
-        } else if (agentName === "Jemma") {
-          newEval = {
-            agentName: "Jemma",
-            questionAsked: "What can we actually support with evidence? What is assumed or unknown?",
-            agentClaim: `Jemma: Verified ${twin.observations?.length || 3} evidence records. Provenance confirmed. Zero ungrounded assumptions in pipeline.`,
-            supportingEvidenceRefs: twin.observations?.slice(0, 2).map((o) => o.id) || ["Evidence obs-alpha"],
-            passedGovernanceCheck: true,
-            operatorApprovalRequired: false,
-            timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-          };
-        } else if (agentName === "Orion") {
-          newEval = {
-            agentName: "Orion",
-            questionAsked: "If we remove this condition, does the path collapse? Is this a genuine MUST?",
-            agentClaim: `Orion: Counterfactual Test executed: Removing stabilization constraint causes system trajectory collapse. VERDICT: BINDING MUST.`,
-            supportingEvidenceRefs: ["Simulated counterfactual run"],
-            passedGovernanceCheck: true,
-            operatorApprovalRequired: false,
-            timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-          };
-        } else if (agentName === "Claudia") {
-          newEval = {
-            agentName: "Claudia",
-            questionAsked: "What model, runtime or hardware fabric is capable of resolving this constraint?",
-            agentClaim: `Claudia: Evaluated capability registry. Allocated GPU Local Substrate + Cloud Gemini 3.6 Flash fallback. Latency: 12ms. Trust Score: 96%.`,
-            supportingEvidenceRefs: ["Capability Registry & Hardware Fabric"],
-            passedGovernanceCheck: true,
-            operatorApprovalRequired: false,
-            timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-          };
-        } else {
-          newEval = {
-            agentName: "Natalia",
-            questionAsked: "Are we inside the authorized boundary? Do any of the 10 Stop Conditions apply?",
-            agentClaim: `Natalia: Verified 10 Stop Conditions. All governance boundaries satisfied. Halting at Operator Gate for final authorization.`,
-            supportingEvidenceRefs: ["Governance Ruleset"],
-            passedGovernanceCheck: true,
-            operatorApprovalRequired: true,
-            timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-          };
-        }
-
-        setEvaluations((prev) => [newEval, ...prev]);
-
-        // Final step
-        if (idx === coreSequence.length - 1) {
-          setTimeout(() => {
-            setIsExecutingLoop(false);
-            setCurrentExecutingAgentIndex(null);
-            setAgents(DEFAULT_AGENTS);
-            setSimulatedDiscoveryOutcome({
-              mustCondition: `System must enforce dynamic boundary equilibrium rule for ${twin.name} under fluctuating load.`,
-              falsificationProof: `Removing this rule causes uncontrolled drift within 14 execution steps. MUST condition verified.`,
-              targetState: `State_${(twin.pathfinderRecords?.length || 0) + 1}: Equilibrium Stabilized`
-            });
-          }, 800);
-        }
-      }, (idx + 1) * 1100);
-    });
   };
 
   return (
@@ -595,6 +595,30 @@ export function EpistemicAgentFieldView({ twin, onUpdateTwin }: EpistemicAgentFi
         </div>
 
         <div className="space-y-4">
+          {modelStatusNotice && (
+            <div
+              className={`p-3.5 rounded border text-xs font-mono flex items-start space-x-3 ${
+                modelStatusNotice.type === "unavailable"
+                  ? "bg-[#EF4444]/10 border-[#EF4444]/40 text-[#EF4444]"
+                  : modelStatusNotice.type === "error"
+                  ? "bg-[#EAB308]/10 border-[#EAB308]/40 text-[#EAB308]"
+                  : "bg-[#10B981]/10 border-[#10B981]/40 text-[#10B981]"
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <span className="font-bold uppercase tracking-wider block">
+                  {modelStatusNotice.type === "unavailable"
+                    ? "Substrate Notice: Reasoning Model Unavailable"
+                    : modelStatusNotice.type === "error"
+                    ? "Substrate Warning: Loop Offline"
+                    : "Frontier Model Active"}
+                </span>
+                <p className="text-[11px] leading-relaxed opacity-90">{modelStatusNotice.message}</p>
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-mono text-[#8A8F9A] uppercase mb-1.5">
               Operator Intention Directive
@@ -701,7 +725,11 @@ export function EpistemicAgentFieldView({ twin, onUpdateTwin }: EpistemicAgentFi
             return (
               <div
                 key={idx}
-                className="p-4 bg-[#181A20] border border-[#22262F] rounded space-y-2 text-xs font-mono"
+                className={`p-4 bg-[#181A20] rounded space-y-2 text-xs font-mono border ${
+                  !ev.passedGovernanceCheck || ev.agentClaim.startsWith("[UNAVAILABLE")
+                    ? "border-[#EF4444]/40 bg-[#181A20]/90"
+                    : "border-[#22262F]"
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -713,7 +741,14 @@ export function EpistemicAgentFieldView({ twin, onUpdateTwin }: EpistemicAgentFi
                     <span className="text-[#8A8F9A] text-[10px]">({agentMeta?.role})</span>
                   </div>
 
-                  <span className="text-[10px] text-[#8A8F9A]">{ev.timestamp}</span>
+                  <div className="flex items-center space-x-2">
+                    {!ev.passedGovernanceCheck && (
+                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/30 uppercase">
+                        UNVERIFIED / DISCONNECTED
+                      </span>
+                    )}
+                    <span className="text-[10px] text-[#8A8F9A]">{ev.timestamp}</span>
+                  </div>
                 </div>
 
                 <div>
@@ -721,8 +756,20 @@ export function EpistemicAgentFieldView({ twin, onUpdateTwin }: EpistemicAgentFi
                   <p className="text-[#EAB308] italic">"{ev.questionAsked}"</p>
                 </div>
 
-                <div className="bg-[#13151A] p-3 rounded border border-[#22262F] space-y-1">
-                  <span className="text-[10px] text-[#4ADE80] font-bold block">AGENT CLAIM & REASONING:</span>
+                <div className={`p-3 rounded border space-y-1 ${
+                  !ev.passedGovernanceCheck || ev.agentClaim.startsWith("[UNAVAILABLE")
+                    ? "bg-[#13151A] border-[#EF4444]/30"
+                    : "bg-[#13151A] border-[#22262F]"
+                }`}>
+                  <span className={`text-[10px] font-bold block ${
+                    !ev.passedGovernanceCheck || ev.agentClaim.startsWith("[UNAVAILABLE")
+                      ? "text-[#EF4444]"
+                      : "text-[#4ADE80]"
+                  }`}>
+                    {!ev.passedGovernanceCheck || ev.agentClaim.startsWith("[UNAVAILABLE")
+                      ? "AGENT CLAIM (DISCONNECTED / HALTED):"
+                      : "AGENT CLAIM & REASONING:"}
+                  </span>
                   <p className="text-[#E6E4DF]">{ev.agentClaim}</p>
                 </div>
 

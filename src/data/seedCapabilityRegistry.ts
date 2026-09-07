@@ -87,6 +87,20 @@ export const SYSTEM_INFERENCE_RAILS: InferenceRail[] = [
     trustRationale: "Operator Approved: Epistemic framing, constraint discovery & counterfactual ablation (Does NOT manufacture raw solver output)."
   },
   {
+    rail_id: "RAIL-OPENAI-REASONING",
+    provider: "OpenAI",
+    runtime: "openai-responses-api",
+    deployment_mode: "HOSTED_EXTERNAL",
+    model_id: "gpt-5.6-sol (SIMON Bound)",
+    endpoint: "https://api.openai.com/v1/responses",
+    capabilities: ["advisory_reasoning", "semantic_interpretation", "hypothesis_generation", "strict_json"],
+    trust_state: "APPROVED",
+    credential_state: "CONFIGURED",
+    health_state: "HEALTHY",
+    execution_location: "OpenAI Frontier Inference Fabric",
+    trustRationale: "Advisory Reasoning Rail: Bound strictly to SIMON for meaning and hypothesis generation. Audited by JEMMA; constrained by OCTAGON. Acceleration ≠ Authority."
+  },
+  {
     rail_id: "RAIL-FPT-HPC",
     provider: "FPT AI Factory (Revoked)",
     runtime: "fpt-hpc-runtime-v4.1",
@@ -130,6 +144,35 @@ export const SYSTEM_CAPABILITY_REGISTRY: ModelCapability[] = [
     ],
     costPer1kTokens: 0.00015,
     maxContextTokens: 1000000,
+    activeStatus: "available"
+  },
+  {
+    id: "openai-reasoning-sol",
+    name: "OpenAI Reasoning Rail (SIMON Bound)",
+    provider: "OpenAI",
+    trustState: "APPROVED",
+    latencyMs: {
+      avgMs: 320,
+      p95Ms: 650,
+      rating: "low"
+    },
+    hardwareRequirements: {
+      targetDevice: "Cloud",
+      minVramGB: 0,
+      recommendedCpuCores: 2,
+      bandwidthMbps: 10,
+      offlineSupport: false
+    },
+    trustScore: 95,
+    supportedDomains: ["physical", "engineered", "biological", "environmental", "conceptual", "musical", "hybrid"],
+    capabilities: [
+      "advisory_reasoning",
+      "semantic_interpretation",
+      "hypothesis_generation",
+      "strict_json"
+    ],
+    costPer1kTokens: 0.0003,
+    maxContextTokens: 128000,
     activeStatus: "available"
   },
   {

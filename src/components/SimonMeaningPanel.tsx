@@ -432,6 +432,7 @@ export function SimonMeaningPanel({
             >
               <option value="gemini-provider">Gemini 2.5 Flash (Google AI)</option>
               <option value="gemini-pro-provider">Gemini 2.5 Pro (Deep Inference)</option>
+              <option value="openai-provider">OpenAI Reasoning Rail (SIMON Bound)</option>
               <option value="pathfinder-governed-reasoner">Pathfinder Governed Domain Reasoner</option>
               <option value="local-deterministic-mock">Air-Gapped Local Solver (Deterministic)</option>
             </select>

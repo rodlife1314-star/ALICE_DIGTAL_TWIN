@@ -137,6 +137,32 @@ export function ComputeRegistry({ twin, onNavigateToTab }: ComputeRegistryProps)
   const [apertureScale, setApertureScale] = useState<"55um" | "10um" | "500nm">("500nm");
   const [activeCellFilter, setActiveCellFilter] = useState<string>("all");
 
+  // OpenAI Reasoning Rail Operator Status
+  const [openaiStatus, setOpenaiStatus] = useState<{
+    provider: string;
+    model: string;
+    status: "AVAILABLE" | "DEGRADED" | "UNAVAILABLE";
+    authority: string;
+    bound_to: string;
+    audit: string;
+    policy_boundary: string;
+    configured: boolean;
+    endpoint: string;
+    error_detail?: string;
+  } | null>(null);
+
+  const fetchOpenAIStatus = async () => {
+    try {
+      const res = await fetch("/api/reasoning/provider-status");
+      if (res.ok) {
+        const data = await res.json();
+        setOpenaiStatus(data);
+      }
+    } catch (e) {
+      console.warn("Failed to query OpenAI provider status:", e);
+    }
+  };
+
   const fetchHealth = async () => {
     setIsLoadingHealth(true);
     try {
@@ -169,6 +195,7 @@ export function ComputeRegistry({ twin, onNavigateToTab }: ComputeRegistryProps)
   useEffect(() => {
     fetchHealth();
     fetchWorkloads();
+    fetchOpenAIStatus();
   }, []);
 
   const handleRunAttestation = async () => {
@@ -474,7 +501,7 @@ export function ComputeRegistry({ twin, onNavigateToTab }: ComputeRegistryProps)
       {subTab === "overview" && (
         <div className="space-y-8">
           {/* Dual-Container Architectural Topology Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
             {/* Box 1: Pathfinder Node 22 Body */}
             <div className="bg-[#0E1015] border border-[#222733] rounded-xl p-5 flex flex-col justify-between">
               <div>
@@ -619,6 +646,65 @@ export function ComputeRegistry({ twin, onNavigateToTab }: ComputeRegistryProps)
 
               <div className="mt-5 p-3 rounded-lg bg-[#141722] border border-[#262D3D] text-[11px] text-[#8A8F9A]">
                 <strong>Scientific Engine:</strong> Runs deterministic sweeps, PDE systems, and multi-scale convolutions without claiming fabricated GPU speedups.
+              </div>
+            </div>
+
+            {/* Box 4: OpenAI Advisory Reasoning Rail (Bound to SIMON) */}
+            <div className="bg-[#0E1015] border border-[#222733] rounded-xl p-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-3 border-b border-[#1C212D]">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="p-1.5 rounded bg-purple-950/60 border border-purple-500/40 text-purple-400">
+                      <Brain className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-bold text-[#E6E4DF] uppercase">OpenAI Reasoning Rail</h3>
+                      <p className="text-[10px] text-[#737885]">Bound to SIMON · Advisory Only</p>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded border font-bold ${
+                      openaiStatus?.status === "AVAILABLE"
+                        ? "bg-emerald-950/80 border-emerald-500/50 text-emerald-400"
+                        : openaiStatus?.status === "DEGRADED"
+                        ? "bg-amber-950/80 border-amber-500/50 text-amber-400"
+                        : "bg-rose-950/80 border-rose-500/50 text-rose-400"
+                    }`}
+                  >
+                    {openaiStatus?.status || "PROBING..."}
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-2 text-xs text-[#A0A8B8]">
+                  <div className="flex items-center justify-between py-1 border-b border-[#161922]">
+                    <span className="text-[#737885]">Provider</span>
+                    <span className="text-[#E6E4DF] font-bold">{openaiStatus?.provider || "OpenAI"}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-[#161922]">
+                    <span className="text-[#737885]">Model</span>
+                    <span className="text-[#38BDF8] font-mono">{openaiStatus?.model || "gpt-4o-mini"}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-[#161922]">
+                    <span className="text-[#737885]">Authority</span>
+                    <span className="text-amber-400 font-bold">{openaiStatus?.authority || "ADVISORY"}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-[#161922]">
+                    <span className="text-[#737885]">Bound to</span>
+                    <span className="text-purple-400 font-bold">{openaiStatus?.bound_to || "SIMON"}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-[#161922]">
+                    <span className="text-[#737885]">Audit Rail</span>
+                    <span className="text-[#E6E4DF] font-bold">{openaiStatus?.audit || "JEMMA"}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-[#737885]">Policy Boundary</span>
+                    <span className="text-[#C5A059] font-bold">{openaiStatus?.policy_boundary || "OCTAGON"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 p-3 rounded-lg bg-[#141722] border border-[#262D3D] text-[11px] text-[#8A8F9A]">
+                <strong>Doctrine:</strong> Acceleration ≠ Authority. Advisory engine proposes hypotheses and meaning. Cannot commit actions or alter authoritative state.
               </div>
             </div>
           </div>
