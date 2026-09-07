@@ -68,9 +68,21 @@ export function FooterSystemMonitor() {
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
   const fetchComputeHealth = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     try {
       setIsLoading(true);
-      const res = await fetch("/api/system/compute-health");
+      const targetUrl = typeof window !== "undefined" && window.location?.origin
+        ? `${window.location.origin}/api/system/compute-health`
+        : "/api/system/compute-health";
+
+      const res = await fetch(targetUrl, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
+        signal: controller.signal
+      });
+
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data) {
@@ -78,17 +90,21 @@ export function FooterSystemMonitor() {
           setLastRefreshed(new Date());
         }
       }
-    } catch (err) {
-      console.error("Failed to fetch GPU compute health telemetry:", err);
+    } catch (err: any) {
+      // Gracefully maintain operational baseline telemetry if background probe is transiently unavailable
+      if (err?.name !== "AbortError") {
+        console.warn("[SYSTEM MONITOR] Compute health telemetry probe deferred:", err?.message || err);
+      }
     } finally {
+      clearTimeout(timeoutId);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchComputeHealth();
-    // Poll every 12 seconds for live telemetry update
-    const interval = setInterval(fetchComputeHealth, 12000);
+    // Poll every 15 seconds for live telemetry update
+    const interval = setInterval(fetchComputeHealth, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -252,13 +268,15 @@ export function FooterSystemMonitor() {
           </div>
 
           {/* Substrate Doctrine Footer Note */}
-          <div className="mt-3 pt-2 border-t border-[#1C212B] flex flex-wrap items-center justify-between gap-2 text-[9px] text-[#737885]">
+          <div className="mt-3 pt-2 border-t border-[#1C212B] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[9px] text-[#737885]">
             <div className="flex items-center space-x-1.5">
-              <Terminal className="w-3 h-3 text-[#38BDF8]" />
-              <span>Probe Command: <code>nvidia-smi --query-gpu=name,driver_version,utilization.gpu,memory.used,temperature.gpu --format=csv</code></span>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>
+                <strong className="text-[#C5CAD4]">SEMANTIC STATUS CONSISTENCY:</strong> Global <code>GPU AVAILABLE</code> denotes system capability. Individual workloads report per-run attestations (<code>CPU · NumPy</code> vs <code>CUDA GPU</code>). <code>GPU_READY ≠ GPU_USED</code>.
+              </span>
             </div>
-            <div className="italic text-[#8A8F9A]">
-              "Acceleration does not create authority. The Operator reads the residual."
+            <div className="italic text-[#8A8F9A] shrink-0">
+              "Acceleration does not create authority. SIMON translates the state."
             </div>
           </div>
         </div>
@@ -266,19 +284,29 @@ export function FooterSystemMonitor() {
 
       {/* Persistent Bottom Status Bar */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between text-[11px]">
-        {/* Left: GPU Health Status Indicator */}
+        {/* Left: GPU Health Status Indicator & Semantic Status Consistency */}
         <div className="flex items-center space-x-3">
           <div
             onClick={() => setIsExpanded(!isExpanded)}
             className="flex items-center space-x-2 cursor-pointer hover:opacity-85 transition-opacity"
-            title="Toggle system compute health monitor"
+            title="Toggle system compute health monitor & epistemic status consistency"
           >
+            {/* System Capability Tag */}
             <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-[#12151E] border border-emerald-500/40 text-emerald-400 font-bold text-[10px]">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <Cpu className="w-3 h-3" />
-              <span>GPU READY</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <Server className="w-3 h-3" />
+              <span className="text-[9px] text-[#8A8F9A] uppercase">CAPABILITY:</span>
+              <span>GPU AVAILABLE</span>
             </div>
-            <span className="text-[10px] text-[#8A8F9A] hidden sm:inline">
+
+            {/* Current / Baseline Execution Provenance Tag */}
+            <div className="hidden sm:flex items-center space-x-1.5 px-2 py-0.5 rounded bg-[#0E1015] border border-sky-500/40 text-[#38BDF8] font-bold text-[10px]">
+              <Cpu className="w-3 h-3 text-[#38BDF8]" />
+              <span className="text-[9px] text-[#8A8F9A] uppercase">EXEC:</span>
+              <span>CPU · NumPy</span>
+            </div>
+
+            <span className="text-[10px] text-[#8A8F9A] hidden lg:inline">
               <code className="text-[#38BDF8] font-bold">nvidia-smi</code>: <span className="text-[#A0A4AB]">{data?.nvidiaSmiPath || "/usr/bin/nvidia-smi"}</span>
             </span>
           </div>

@@ -10,6 +10,7 @@ import { ObservationView } from "./components/ObservationView";
 import { SimulationView } from "./components/SimulationView";
 import { ConstraintDiscoveryView } from "./components/ConstraintDiscoveryView";
 import { CapabilityRegistryView } from "./components/CapabilityRegistryView";
+import { ComputeRegistry } from "./components/ComputeRegistry";
 import { TimelineView } from "./components/TimelineView";
 import { GovernanceView } from "./components/GovernanceView";
 import { TwinObservatory } from "./components/TwinObservatory";
@@ -193,6 +194,10 @@ export function App() {
 
         {activeTab === "capabilities" && activeTwin && (
           <CapabilityRegistryView twin={activeTwin} onUpdateTwin={handleUpdateTwin} />
+        )}
+
+        {activeTab === "compute" && (
+          <ComputeRegistry twin={activeTwin} onNavigateToTab={setActiveTab} />
         )}
 
         {activeTab === "timeline" && activeTwin && (

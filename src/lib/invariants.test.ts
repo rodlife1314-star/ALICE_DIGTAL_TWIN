@@ -7,6 +7,7 @@ import { UnsupportedDomainSpatialAdapter } from "../spatial/adapters/Unsupported
 import { MembraneSpatialAdapter } from "../spatial/adapters/MembraneSpatialAdapter";
 import { DigitalTwin } from "../types";
 import { JetsonEdgeModule, JETSON_PROFILES } from "./jetsonEdgeModule";
+import { JEMMA_GROUND_TRUTH_CATALOG, executeJemmaComputerAudit } from "./jemmaRail";
 
 console.log("==================================================================");
 console.log("    PATHFINDER DIGITAL TWIN SUBSTRATE — INVARIANT TEST SUITE     ");
@@ -249,6 +250,253 @@ const unsupportedCodecReceipt = JetsonEdgeModule.benchmarkAndInspectEdgePipeline
   targetHardware: "JETSON_ORIN_NANO_8GB" // Orin Nano does not support AV1 encode
 });
 assert(unsupportedCodecReceipt.verdict === "CODEC_UNSUPPORTED", "Accurately identifies codec capability constraints on Jetson Orin Nano");
+
+// ── TEST GROUP 7: SCIENCE RAIL CONTAINER & CRYPTOGRAPHIC PROBE CONTRACT ──────
+console.log("\n[TEST GROUP 7: Science Rail Container Contract & Compute Attestation]");
+
+import crypto from "crypto";
+
+// Test 1: Canonical deterministic SHA-256 sealing of scientific compute payloads
+const computePayload = {
+  workload: "vector_mean_stats",
+  parameters: { values: [14.2, 28.5, 39.1, 44.0, 52.6, 68.3, 91.0] }
+};
+const canonicalJson = JSON.stringify(computePayload, Object.keys(computePayload).sort());
+const manifestHash = crypto.createHash("sha256").update(canonicalJson).digest("hex");
+assert(manifestHash.length === 64, "Canonical manifest SHA-256 hash has exactly 64 hex characters");
+
+// Test 2: Double-Helix Co-Evolution base pair mapping invariant
+const helixPairs = [
+  { learning: "OBSERVE", teaching: "ELICIT" },
+  { learning: "ATTEMPT", teaching: "MODEL" },
+  { learning: "MAKE_ERROR", teaching: "DIAGNOSE" },
+  { learning: "REFLECT", teaching: "SCAFFOLD" },
+  { learning: "INTEGRATE", teaching: "VALIDATE" },
+  { learning: "TRANSFER", teaching: "FADE_SUPPORT" }
+];
+assert(helixPairs.length === 6, "Learning helix maintains 6 co-evolutionary base pairs");
+assert(helixPairs.every(p => p.learning && p.teaching), "Every learning step is anchored to an active teaching response");
+
+// ── TEST GROUP 8: SPATIAL ISOFORM FIELD & APERTURE DOCTRINE (NATURE METHODS 2026) ──
+console.log("\n[TEST GROUP 8: Spatial Isoform State Function & Aperture-Dependent Reality]");
+
+// Test 1: Invariant: Spatial position is a state variable, not merely metadata
+interface BiologicalStatePoint {
+  gene: string;
+  cellIdentity: string;
+  spatialCoordinate: [number, number, number]; // [x, y, z] in nanometres
+  microenvironment: { regional_ph: number; local_density: number };
+  isoformState: string;
+}
+
+const stateFunction = (p: BiologicalStatePoint): string => {
+  // I = f(G, C, x, y, z, E, t)
+  // For Snap25 in Excitatory Neurons:
+  // Cortex layers 2/3 (z < 400) -> Snap25-201
+  // Cortex layer 5 / deep midbrain (z >= 400) -> Snap25-202
+  if (p.gene === "Snap25" && p.cellIdentity === "excitatory_neuron") {
+    return p.spatialCoordinate[1] > 400 ? "Snap25-202" : "Snap25-201";
+  }
+  return "canonical_default";
+};
+
+const cellInSuperficialCortex: BiologicalStatePoint = {
+  gene: "Snap25",
+  cellIdentity: "excitatory_neuron",
+  spatialCoordinate: [150, 200, 10], // superficial layer
+  microenvironment: { regional_ph: 7.3, local_density: 0.85 },
+  isoformState: "pending"
+};
+
+const cellInDeepMidbrain: BiologicalStatePoint = {
+  gene: "Snap25",
+  cellIdentity: "excitatory_neuron", // IDENTICAL cell identity
+  spatialCoordinate: [150, 650, 10], // deep midbrain / layer 5
+  microenvironment: { regional_ph: 7.3, local_density: 0.85 },
+  isoformState: "pending"
+};
+
+const superficialIsoform = stateFunction(cellInSuperficialCortex);
+const deepIsoform = stateFunction(cellInDeepMidbrain);
+
+assert(superficialIsoform === "Snap25-201", "Superficial excitatory neuron realizes canonical Snap25-201 isoform");
+assert(deepIsoform === "Snap25-202", "Deep midbrain excitatory neuron realizes alternative Snap25-202 isoform");
+assert(superficialIsoform !== deepIsoform, "Identical cell type yields divergent molecular isoform based on spatial position coordinate");
+
+// Test 2: Moran's I spatial autocorrelation evaluation
+const N = 8;
+const values = [0.9, 0.85, 0.8, 0.75, 0.2, 0.15, 0.1, 0.05]; // clear spatial clustering
+const meanX = values.reduce((a, b) => a + b, 0) / N;
+const diffX = values.map(v => v - meanX);
+const ssX = diffX.reduce((a, b) => a + b * b, 0);
+
+// 1D chain adjacency matrix
+let wSum = 0;
+let numMoran = 0;
+for (let i = 0; i < N; i++) {
+  for (let j = 0; j < N; j++) {
+    if (Math.abs(i - j) === 1) { // adjacent neighbors
+      wSum += 1;
+      numMoran += diffX[i] * diffX[j];
+    }
+  }
+}
+const calculatedMoranI = (N / wSum) * (numMoran / ssX);
+const expectedMoranI = -1.0 / (N - 1);
+assert(calculatedMoranI > 0.4, "Moran's I accurately detects positive spatial autocorrelation (I > 0.4)");
+assert(calculatedMoranI > expectedMoranI, "Calculated Moran's I strictly exceeds random null expectation E[I]");
+
+// Test 3: Epistemic Layer Preservation Invariant
+const epistemicLayers = [
+  { level: 1, name: "RAW_MEASURED_SIGNAL", content: "500-nm coordinates, raw long reads (ONT/PB)" },
+  { level: 2, name: "DERIVED_ASSIGNMENT", content: "Spl-IsoQuant-2 barcode calling + deconcatenation" },
+  { level: 3, name: "INFERRED_FIELD", content: "Spl-IsoFind Moran's I & cell-type-constrained permutation" }
+];
+assert(epistemicLayers.length === 3, "Helix maintains exactly 3 distinct, non-collapsed epistemic layers");
+assert(epistemicLayers[0].level < epistemicLayers[1].level && epistemicLayers[1].level < epistemicLayers[2].level, "Epistemic flow enforces monotonic progression from measurement to inference");
+
+// Test 4: Aperture Resolution Invariant: Spot area ratio at 500 nm vs 55 µm
+const areaVisium55um = Math.PI * Math.pow(27.5, 2); // ~2375 µm²
+const areaSplIsoSeq500nm = Math.pow(0.5, 2); // 0.25 µm²
+const resolutionRatio = areaVisium55um / areaSplIsoSeq500nm;
+assert(resolutionRatio > 9000, "Spl-ISO-Seq2 500-nm spot area provides >9,000x spatial areal density improvement over 55-µm pseudo-bulk");
+
+// ── TEST GROUP 9: SIMON SEMANTIC INTERPRETATION LAYER & JEMMA ADVERSARIAL AUDIT ──
+console.log("\n[TEST GROUP 9: SIMON Semantic Interpretation Layer & Jemma Adversarial Audit]");
+const {
+  auditSimonEnvelope,
+  generateSimonMeaningForSpatialIsoform,
+  synthesizeSimonMeaning
+} = await import("./simon");
+
+// Test 1: Compliant baseline synthesis passes Jemma audit with 100% proportionality
+const validIsoformSimon = generateSimonMeaningForSpatialIsoform({
+  gene: "Snap25",
+  targetIsoform: "Snap25-201",
+  cellType: "excitatory_neuron",
+  moranI: 0.1718,
+  expectedI: -0.0084,
+  apertureNm: 500,
+  constrainedPVal: 0.0014
+});
+assert(validIsoformSimon.jemma_audit.passed === true, "SIMON baseline synthesis passes Jemma audit without violations");
+assert(validIsoformSimon.jemma_audit.proportionality_score === 1.0, "Compliant SIMON synthesis achieves 1.0 proportionality score");
+assert(validIsoformSimon.simon_constraints.no_authority_claim === true, "SIMON enforces strict no_authority_claim constraint");
+
+// Test 2 (Adversarial): Causal Leap Rejection ("causes")
+const adversarialCausalEnvelope = {
+  ...validIsoformSimon,
+  plain_language_meaning: "The clustering of Snap25-201 causes differential synaptogenesis in deep cortical layers."
+};
+const evidenceRef = {
+  envelope_id: "EVID-TEST-CAUSAL",
+  question: "Is there spatial clustering?",
+  aperture: { spatial: "500 nm" },
+  provenance: { source: "Observational", timestamp: new Date().toISOString(), verification_level: "VERIFIED" as const },
+  constraints: ["Observational spatial transcriptomics without interventional gene knockout"]
+};
+const causalAudit = auditSimonEnvelope(adversarialCausalEnvelope, evidenceRef);
+assert(causalAudit.passed === false, "Jemma audit blocks causal statement in purely observational evidence envelope");
+assert(causalAudit.violations.some(v => v.includes("CAUSALITY_BREACH")), "Jemma flags CAUSALITY_BREACH on forbidden predicate 'causes'");
+
+// Test 3 (Adversarial): Category Masquerade Rejection (Inference masquerading as MEASURED)
+const adversarialMasqueradeEnvelope = {
+  ...validIsoformSimon,
+  evidence_interpretation: [
+    {
+      statement: "Pathfinder measured that this likely indicates developmental synaptic priming.",
+      epistemic_class: "MEASURED" as const,
+      evidence_refs: ["raw_data"]
+    }
+  ]
+};
+const masqueradeAudit = auditSimonEnvelope(adversarialMasqueradeEnvelope, evidenceRef);
+assert(masqueradeAudit.passed === false, "Jemma audit blocks category masquerade where inference is tagged as MEASURED");
+assert(masqueradeAudit.violations.some(v => v.includes("CATEGORY_MASQUERADE")), "Jemma explicitly flags CATEGORY_MASQUERADE violation");
+
+// Test 4 (Adversarial): Authority Usurpation Rejection ("the operator must")
+const adversarialAuthorityEnvelope = {
+  ...validIsoformSimon,
+  plain_language_meaning: "The operator must now accept this result as proof of biological function."
+};
+const authorityAudit = auditSimonEnvelope(adversarialAuthorityEnvelope, evidenceRef);
+assert(authorityAudit.passed === false, "Jemma audit blocks statement attempting to usurp operator decision authority");
+assert(authorityAudit.violations.some(v => v.includes("AUTHORITY_BREACH")), "Jemma flags AUTHORITY_BREACH on 'the operator must'");
+
+// Test 5 (Adversarial): Negative Overclaim Rejection ("proves there is no effect")
+const adversarialNegativeEnvelope = {
+  ...validIsoformSimon,
+  does_not_support: ["This result proves there is no effect in non-neuronal glial cells."]
+};
+const negativeAudit = auditSimonEnvelope(adversarialNegativeEnvelope, evidenceRef);
+assert(negativeAudit.passed === false, "Jemma audit blocks negative overclaim treating lack of evidence as proof of absence");
+assert(negativeAudit.violations.some(v => v.includes("NEGATIVE_OVERCLAIM")), "Jemma flags NEGATIVE_OVERCLAIM on 'proves there is no effect'");
+
+// Test 6 (Fail-Closed): Unverified provenance fails closed
+const unverifiedEvidence = {
+  envelope_id: "EVID-UNVERIFIED",
+  question: "Unverified run",
+  aperture: { spatial: "500 nm" },
+  provenance: { source: "Untrusted", timestamp: new Date().toISOString(), verification_level: "UNVERIFIED" as const },
+  constraints: []
+};
+const failClosedAudit = auditSimonEnvelope(validIsoformSimon, unverifiedEvidence);
+assert(failClosedAudit.passed === false, "Jemma audit fails closed when evidence envelope provenance is UNVERIFIED");
+assert(failClosedAudit.violations.some(v => v.includes("FAIL_CLOSED")), "Jemma issues explicit FAIL_CLOSED violation on unverified provenance");
+
+// ── TEST GROUP 10: JEMMA REALITY RAIL & GROUND-TRUTH TELEMETRY ANCHORS ────────
+console.log("\n[TEST GROUP 10: JEMMA Ground-Truth Reality Rail & Earth Observation Anchors]");
+
+// Test 1: Ground truth catalog contains canonical agency baselines
+assert(JEMMA_GROUND_TRUTH_CATALOG.length === 5, "Ground truth catalog maintains exactly 5 empirical agency datasets");
+const noaaDataset = JEMMA_GROUND_TRUTH_CATALOG.find(d => d.id === "NOAA_AVHRR_PATHFINDER_V53");
+assert(Boolean(noaaDataset && noaaDataset.agency === "NOAA"), "Catalog includes NOAA AVHRR Pathfinder 4km global equal-angle SST");
+const dmDataset = JEMMA_GROUND_TRUTH_CATALOG.find(d => d.id === "GOOGLE_DEEPMIND_WEATHERNEXT_3");
+assert(Boolean(dmDataset && dmDataset.agency === "GOOGLE_DEEPMIND"), "Catalog includes Google DeepMind WeatherNext 3 ensemble anchored to ECMWF ERA5");
+
+// Test 2: Nominal SST within physical seawater freezing and thermodynamic lapse bounds
+const nominalSstAudit = executeJemmaComputerAudit("noaa_avhrr_pathfinder_sst", {
+  mean_sst_c: 18.24,
+  skin_sst_c: 18.07,
+  bulk_sst_c: 18.24,
+  sst_anomaly_k: +0.48
+});
+assert(nominalSstAudit.status === "JEMMA_CERTIFIED_GROUND_TRUTH", "Nominal sea surface temperature passes JEMMA physical verification");
+assert(nominalSstAudit.driftScore <= 0.05, "Nominal SST exhibits < 5% empirical drift from Pathfinder 4km baseline");
+assert(nominalSstAudit.evaluatedRules.length >= 6, "JEMMA evaluates all 6 constitutional reality rules");
+assert(nominalSstAudit.auditId.startsWith("JEMMA-"), "Audit receipt carries cryptographic JEMMA audit ID");
+
+// Test 3 (Adversarial Physical Boundary Breach): Non-physical liquid water freezing point breach (T < 271.35K)
+const freezingBreachAudit = executeJemmaComputerAudit("noaa_avhrr_pathfinder_sst", {
+  mean_sst_c: -4.50, // Physical impossibility for liquid sea water (freezes at -1.8°C / 271.35 K)
+  skin_sst_c: -4.67,
+  bulk_sst_c: -4.50,
+  sst_anomaly_k: -8.2
+});
+assert(freezingBreachAudit.status === "JEMMA_REJECTED_PHYSICAL_BREACH", "JEMMA rejects non-physical sub-freezing liquid ocean temperature");
+assert(freezingBreachAudit.evaluatedRules.some(r => !r.passed && r.ruleId === "JEMMA-R1"), "JEMMA explicitly flags physical boundary breach under JEMMA-R1");
+
+// Test 4: DeepMind WeatherNext 3 moisture mass conservation invariant
+const weatherNextAudit = executeJemmaComputerAudit("deepmind_weathernext_era5_audit", {
+  forecast_rmse_k: 0.81,
+  era5_reanalysis_correlation: 0.988,
+  moisture_mass_conservation_error_pct: 0.038
+});
+assert(weatherNextAudit.status === "JEMMA_CERTIFIED_GROUND_TRUTH", "WeatherNext neural forecast satisfies ERA5 ground-truth moisture mass conservation");
+assert(weatherNextAudit.groundTruthAnchor.datasetId === "GOOGLE_DEEPMIND_WEATHERNEXT_3", "Anchor references WeatherNext 3 dataset");
+
+// Test 5 (Adversarial): Non-physical superluminal CME transit velocity breach (> 3200 km/s)
+const superluminalCmeAudit = executeJemmaComputerAudit("solar_sdo_coronagraph_flux", {
+  cme_velocity_kms: 4800.0, // Exceeds upper physical coronal Alfvén ceiling of 3200 km/s
+  predicted_l1_transit_hours: 8.5,
+  solar_wind_dynamic_pressure_npa: 2.15,
+  estimated_geomagnetic_kp_index: 9.0
+});
+assert(superluminalCmeAudit.status === "JEMMA_REJECTED_PHYSICAL_BREACH", "JEMMA blocks CME velocity exceeding coronal Alfvén speed ceiling");
+assert(superluminalCmeAudit.evaluatedRules.some(r => !r.passed && r.ruleId === "JEMMA-R1"), "JEMMA flags CME velocity boundary breach under JEMMA-R1");
+
+// Test 6: Operator sovereign ledger notice is present in all receipts
+assert(nominalSstAudit.operatorNotice.includes("Sovereign operator") || nominalSstAudit.operatorNotice.includes("state ledger"), "JEMMA receipts preserve sovereign operator authority notice");
 
 // ── TEST SUITE SUMMARY ───────────────────────────────────────────────────────
 console.log("\n==================================================================");

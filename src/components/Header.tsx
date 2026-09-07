@@ -25,6 +25,7 @@ export type WorkspaceTab =
   | "simulation"
   | "constraints"
   | "capabilities"
+  | "compute"
   | "timeline"
   | "governance";
 
@@ -202,6 +203,14 @@ export function Header({
           icon={<Settings className="w-3.5 h-3.5" />}
           active={activeTab === "capabilities"}
           onClick={() => onSelectTab("capabilities")}
+          disabled={!activeTwinId}
+        />
+        <TabButton
+          id="compute"
+          label="Compute & Science Rail"
+          icon={<Cpu className="w-3.5 h-3.5 text-[#C5A059]" />}
+          active={activeTab === "compute"}
+          onClick={() => onSelectTab("compute")}
           disabled={!activeTwinId}
         />
         <TabButton

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "jetson-package": {
+      "source": "NVIDIA/skills",
+      "sourceType": "github",
+      "skillPath": "skills/jetson-package/SKILL.md",
+      "computedHash": "0397f5f2406932078c585b2123af4066d635fb69e54ec7428487291db840ddc5"
+    }
+  }
+}
