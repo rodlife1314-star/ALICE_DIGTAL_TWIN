@@ -596,6 +596,26 @@ export function CapabilityRegistryView({ twin, onUpdateTwin }: CapabilityRegistr
                     </div>
                   </div>
 
+                  {/* Weave Router 2.0 Empirical Metrics (if present) */}
+                  {model.observed_task_success !== undefined && (
+                    <div className="p-2 bg-[#0D0E11] rounded border border-[#1E232F] text-[10px] font-mono space-y-1">
+                      <div className="flex items-center justify-between text-[#8A8F9A]">
+                        <span>WEAVE 2.0 SUCCESS:</span>
+                        <span className="text-[#4ADE80] font-bold">{model.observed_task_success}%</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[#8A8F9A]">
+                        <span>MEASURED COST:</span>
+                        <span className="text-[#FAF9F5]">${model.measured_cost_per_completed_task}/task</span>
+                      </div>
+                      {model.escalation_target && (
+                        <div className="flex items-center justify-between text-[#8A8F9A]">
+                          <span>ESCALATION TARGET:</span>
+                          <span className="text-[#C084FC] truncate max-w-[130px]">{model.escalation_target}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Capabilities Tags */}
                   <div>
                     <span className="text-[10px] uppercase font-mono text-[#8A8F9A] block mb-1">

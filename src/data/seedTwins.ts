@@ -1,8 +1,15 @@
 import { DigitalTwin } from "../types";
 import { SYSTEM_CAPABILITY_REGISTRY } from "./seedCapabilityRegistry";
 import { PROJECT_SIXES_TWIN } from "../domains/sixes/seedSixesTwin";
+import { AERIAL_VEHICLE_TWIN } from "./seedAerialTwin";
 
 export const SEED_TWINS: DigitalTwin[] = [
+  {
+    ...AERIAL_VEHICLE_TWIN,
+    capabilityRegistry: SYSTEM_CAPABILITY_REGISTRY,
+    selectedModelId: "jetson-edge-orin",
+    selectedModelCapability: SYSTEM_CAPABILITY_REGISTRY.find(m => m.id === "jetson-edge-orin") || SYSTEM_CAPABILITY_REGISTRY[0]
+  },
   {
     ...PROJECT_SIXES_TWIN,
     capabilityRegistry: SYSTEM_CAPABILITY_REGISTRY,

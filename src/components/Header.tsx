@@ -23,6 +23,8 @@ export type WorkspaceTab =
   | "structure"
   | "observation"
   | "simulation"
+  | "geometry"
+  | "envelope"
   | "constraints"
   | "capabilities"
   | "compute"
@@ -188,6 +190,20 @@ export function Header({
           active={activeTab === "simulation"}
           onClick={() => onSelectTab("simulation")}
           disabled={!activeTwinId}
+        />
+        <TabButton
+          id="geometry"
+          label="Geometric Architecture (G_0)"
+          icon={<Compass className="w-3.5 h-3.5 text-[#509EE3]" />}
+          active={activeTab === "geometry"}
+          onClick={() => onSelectTab("geometry")}
+        />
+        <TabButton
+          id="envelope"
+          label="Evidence Envelope"
+          icon={<Shield className="w-3.5 h-3.5 text-[#4ADE80]" />}
+          active={activeTab === "envelope"}
+          onClick={() => onSelectTab("envelope")}
         />
         <TabButton
           id="constraints"

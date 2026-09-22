@@ -13,6 +13,7 @@ import {
   Check
 } from "lucide-react";
 import { DigitalTwin, PathfinderRecord, PathfinderStage } from "../types";
+import { JemmaSubstrateReviewPanel } from "./JemmaSubstrateReviewPanel";
 
 interface GovernanceViewProps {
   twin: DigitalTwin;
@@ -20,6 +21,7 @@ interface GovernanceViewProps {
 }
 
 export function GovernanceView({ twin, onUpdateTwin }: GovernanceViewProps) {
+  const [activeGovernanceTab, setActiveGovernanceTab] = useState<"jemma_substrate" | "pathfinder_cycle">("jemma_substrate");
   const [newPfModalOpen, setNewPfModalOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [evidenceText, setEvidenceText] = useState("");
@@ -79,17 +81,50 @@ export function GovernanceView({ twin, onUpdateTwin }: GovernanceViewProps) {
           </p>
         </div>
 
-        <button
-          onClick={() => setNewPfModalOpen(true)}
-          className="flex items-center space-x-1.5 bg-[#4ADE80] hover:bg-[#22C55E] text-[#0D0E11] text-xs font-semibold px-4 py-2 rounded shadow transition-colors cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Pathfinder Query</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 bg-[#14161C] p-1 rounded-lg border border-[#222733] text-xs">
+            <button
+              onClick={() => setActiveGovernanceTab("jemma_substrate")}
+              className={`px-3 py-1.5 rounded font-medium transition-colors cursor-pointer ${
+                activeGovernanceTab === "jemma_substrate"
+                  ? "bg-[#1E2330] text-[#E6E4DF] shadow-sm font-semibold"
+                  : "text-[#8A8F9A] hover:text-[#C8CAD0]"
+              }`}
+            >
+              Jemma Substrate Review & BOE (Ω_safe)
+            </button>
+            <button
+              onClick={() => setActiveGovernanceTab("pathfinder_cycle")}
+              className={`px-3 py-1.5 rounded font-medium transition-colors cursor-pointer ${
+                activeGovernanceTab === "pathfinder_cycle"
+                  ? "bg-[#1E2330] text-[#E6E4DF] shadow-sm font-semibold"
+                  : "text-[#8A8F9A] hover:text-[#C8CAD0]"
+              }`}
+            >
+              Pathfinder 6-Stage Records ({records.length})
+            </button>
+          </div>
+
+          <button
+            onClick={() => setNewPfModalOpen(true)}
+            className="flex items-center space-x-1.5 bg-[#4ADE80] hover:bg-[#22C55E] text-[#0D0E11] text-xs font-semibold px-4 py-2 rounded shadow transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Query</span>
+          </button>
+        </div>
       </div>
 
-      {/* Pathfinder 6-Stage Visual Banner */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* Mode 1: Jemma Substrate Review & Bounded Operational Envelope */}
+      {activeGovernanceTab === "jemma_substrate" && (
+        <JemmaSubstrateReviewPanel />
+      )}
+
+      {/* Mode 2: Pathfinder 6-Stage Cycle Records */}
+      {activeGovernanceTab === "pathfinder_cycle" && (
+        <>
+          {/* Pathfinder 6-Stage Visual Banner */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
           { stage: "QUESTION", desc: "What are we examining?", color: "#509EE3" },
           { stage: "EVIDENCE", desc: "What info is available?", color: "#C5A059" },
@@ -181,6 +216,8 @@ export function GovernanceView({ twin, onUpdateTwin }: GovernanceViewProps) {
           ))}
         </div>
       </div>
+      </>
+      )}
 
       {/* Pathfinder Modal */}
       {newPfModalOpen && (

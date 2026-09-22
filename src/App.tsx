@@ -8,6 +8,8 @@ import { OverviewView } from "./components/OverviewView";
 import { StructureView } from "./components/StructureView";
 import { ObservationView } from "./components/ObservationView";
 import { SimulationView } from "./components/SimulationView";
+import { GeometricArchitectureView } from "./components/GeometricArchitectureView";
+import { EvidenceEnvelopeView } from "./components/EvidenceEnvelopeView";
 import { ConstraintDiscoveryView } from "./components/ConstraintDiscoveryView";
 import { CapabilityRegistryView } from "./components/CapabilityRegistryView";
 import { ComputeRegistry } from "./components/ComputeRegistry";
@@ -38,7 +40,8 @@ function normalizeTwin(t: any): DigitalTwin {
     revisions: Array.isArray(t.revisions) ? t.revisions : [],
     pathfinderRecords: Array.isArray(t.pathfinderRecords) ? t.pathfinderRecords : [],
     sourceAssets: Array.isArray(t.sourceAssets) ? t.sourceAssets : [],
-    activeFlows: Array.isArray(t.activeFlows) ? t.activeFlows : []
+    activeFlows: Array.isArray(t.activeFlows) ? t.activeFlows : [],
+    evidenceEnvelopes: Array.isArray(t.evidenceEnvelopes) ? t.evidenceEnvelopes : []
   };
 }
 
@@ -186,6 +189,22 @@ export function App() {
 
         {activeTab === "simulation" && activeTwin && (
           <SimulationView twin={activeTwin} onUpdateTwin={handleUpdateTwin} />
+        )}
+
+        {activeTab === "geometry" && (
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
+            <GeometricArchitectureView />
+          </div>
+        )}
+
+        {activeTab === "envelope" && (
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
+            <EvidenceEnvelopeView
+              twin={activeTwin}
+              onUpdateTwin={handleUpdateTwin}
+              onNavigateToTab={setActiveTab}
+            />
+          </div>
         )}
 
         {activeTab === "constraints" && activeTwin && (

@@ -323,6 +323,16 @@ export interface ModelCapability {
   costPer1kTokens?: number;
   maxContextTokens?: number;
   activeStatus: "available" | "busy" | "degraded" | "offline";
+  // Weave Router 2.0 & Empirical Routing Fields (18 Sept 2026 Brief)
+  observed_task_success?: number; // Observed task success rate percentage (e.g. 96.4%)
+  escalation_target?: string;     // Model/Rail ID to escalate to when task complexity/drift increases
+  cache_affinity?: number;        // KV cache / prefix-cache efficiency index (0-100%)
+  measured_cost_per_completed_task?: number; // Empirical $/task rather than nominal input/output token price
+  routerEscalationRule?: {
+    difficultyThreshold: "EASY" | "MEDIUM" | "HARD" | "CRITICAL";
+    escalateOnFailure: boolean;
+    fallbackRailId?: string;
+  };
 }
 
 export interface TaskModelSelectionRequest {
@@ -398,6 +408,7 @@ export interface DigitalTwin {
   selectedModelCapability?: ModelCapability;
   constraintCycles?: ConstraintDiscoveryCycle[];
   constraints?: DiscoveredConstraint[];
+  evidenceEnvelopes?: EvidenceEnvelope[];
   integrityStatus: "STABLE" | "UNRESOLVED_CONSTRAINTS" | "CALIBRATION_MISMATCH" | "CHALLENGED";
   createdAt: string;
   updatedAt: string;
@@ -577,21 +588,38 @@ export interface BasePair {
   status: "COMPLETED" | "ACTIVE" | "PENDING";
 }
 
+export interface LearningBasePair {
+  pairId: string;
+  pairType: "ENCOUNTER" | "DIAGNOSIS" | "FEEDBACK" | "EVIDENCE" | "TRANSFER_CHALLENGE" | "FADE_SUPPORT";
+  learnerState: string;
+  teachingState: string;
+  prompt: string;
+  expectedEvidenceCriterion: string;
+  scaffoldHint: string;
+}
+
 export interface HelixSimulationScenario {
-  id: string;
-  conceptTitle: string;
+  id?: string;
+  scenarioId?: string;
+  conceptTitle?: string;
   domain: string;
-  learnerProfile: string;
-  currentTurnIndex: number;
-  currentCycle: number;
-  masteryCriteria: {
+  targetCompetency?: string;
+  pedagogicalObjective?: string;
+  currentStageIndex?: number;
+  scaffoldingLevel?: "LOW" | "MEDIUM" | "HIGH";
+  learnerProfile?: string;
+  learnerHistory?: any[];
+  activeBasePair?: LearningBasePair;
+  currentTurnIndex?: number;
+  currentCycle?: number;
+  masteryCriteria?: {
     recognisePattern: boolean;
     explainOwnWords: boolean;
     applyWithoutCopying: boolean;
     transferChangedContext: boolean;
     identifyBoundaryBreak: boolean;
   };
-  basePairs: BasePair[];
+  basePairs?: BasePair[];
 }
 
 export interface CrucibleAttackTest {
@@ -642,6 +670,202 @@ export interface DailyCheckpointAuditReceipt {
     attacksRefusedAsExpected: number;
     zeroVulnerabilitiesConfirmed: boolean;
   };
+}
+
+// ─── EXTENDED EVIDENCE ENVELOPE (18 September 2026 Research Brief) ────────────
+// Orthogonal Axis: EPISTEMIC CLASS × EXECUTION DOMAIN × EXECUTION RECEIPT
+
+export type EpistemicClass = 
+  | "MEASURED"   // Direct physical sensor / telemetry observation
+  | "DERIVED"    // Exact deterministic physics / mathematical invariant / conservation law
+  | "INFERRED"   // Model inference / heuristic / LLM cognitive interpretation
+  | "SIMULATED"; // Forward twin PDE / multi-physics / CFD trajectory simulation
+
+export type ExecutionDomain =
+  | "VEHICLE_EDGE" // Aircraft Jetson Orin Nano / embedded microcontroller sensor bus (<15W)
+  | "LOCAL"        // Local Pathfinder Workstation (V8 / AVX-512 / UI / Graph operations)
+  | "LAN_NODE"     // LAN edge node / near-field rack
+  | "REMOTE_GPU"   // Remote GPU cluster (H100 / RTX 4090 / CUDA-X / cuDF)
+  | "CLOUD";       // Cloud frontier model / API fabric
+
+export interface ExecutionReceipt {
+  receiptId: string;
+  artifact: {
+    artifactId: string;
+    artifactType: string;
+    rawSummary: string;
+    contentHash: string;
+    uriOrPayload?: any;
+  };
+  hardware: {
+    device: string;                // e.g. "Jetson Orin Nano (15W)", "AMD Ryzen AI 9 HX 370", "NVIDIA RTX 4090", "H100 SXM5"
+    architecture?: string;        // e.g. "ARMv8.2-A Cortex-A78AE + Ampere", "x86_64 Zen 5 + XDNA 2", "Ada Lovelace"
+    accelerator?: string;
+    memoryGb?: number;
+    powerEnvelopeWatts?: number;  // Power envelope e.g. 15W, 45W, 450W
+  };
+  runtime: {
+    engine: string;               // e.g. "TensorRT 10.3", "ROCm Hyperloom", "cuDF / CUDA-X v24.08", "Local V8 AVX-512", "Google GenAI SDK"
+    version: string;
+    driverVersion?: string;
+  };
+  inputs: {
+    manifestHash: string;
+    parameterCount?: number;
+    samplePayloadSummary: Record<string, any>;
+  };
+  output: {
+    primaryMetric: string;
+    value: any;
+    units: string;
+    uncertaintyBounds?: string;
+    validRange?: [number, number];
+  };
+  latency: {
+    elapsedMs: number;
+    computeMs: number;
+    transferMs?: number;
+  };
+  power: {
+    measuredJoules?: number;
+    averageWatts?: number;
+    batteryImpactMah?: number;
+  };
+  provenance: {
+    timestamp: string;
+    sourceNodeId: string;
+    immutableSignature: string;
+    operatorAttestation?: string;
+    parentReceiptId?: string;
+  };
+  // CUDA-X / Dataframe Fallback & Execution Verification fields (Brief Item 5)
+  cudaXFallbackAudit?: {
+    requestedCapability: "GPU_DATAFRAME" | "GPU_TENSOR" | "GPU_CFD_SOLVER" | "GPU_INFERENCE";
+    selectedBackend: string;      // e.g. "cuDF", "TensorRT", "cuML"
+    actualExecution: "GPU" | "CPU_FALLBACK";
+    fallbackReason?: string;      // e.g. "VRAM spillover avoided", "Operator policy restricted", "Zero GPU detected"
+    bytesProcessed?: number;
+    transferCostMs?: number;
+    elapsedMs?: number;
+  };
+}
+
+// NemoClaw Epistemic Separation Stores & Mutation Rules
+export type EpistemicStoreType =
+  | "AETHER_EVIDENCE"       // Immutable append-only audit trail
+  | "ASTRA_STATE"          // Durable vehicle knowledge & long-term mission state (LocalLSTC)
+  | "CLAUDIA_PROPOSAL"     // Ephemeral agent routing recommendations & exploratory hypotheses
+  | "OCTAGON_PERMISSION"   // Sovereign permission check & safety invariant enforcement
+  | "OPERATOR_ACTION";     // Sovereign human operator command & envelope definition
+
+export type EpistemicMutationRule =
+  | "APPEND_ONLY_AUDIT"
+  | "DURABLE_TRANSACTION"
+  | "EPHEMERAL_PROPOSAL"
+  | "SOVEREIGN_GATE"
+  | "MANUAL_OVERRIDE";
+
+export interface EvidenceEnvelope<T = any> {
+  id: string;
+  variableName: string;
+  value: T;
+  units: string;
+  epistemicClass: EpistemicClass;
+  executionDomain: ExecutionDomain;
+  executionReceipt: ExecutionReceipt;
+  // NemoClaw Epistemic Separation & Mutation Guard
+  epistemicStore: EpistemicStoreType;
+  mutationRule: EpistemicMutationRule;
+  // LocalLSTC Bound: persistent mission state owned by Astra, not reconstructed every cycle
+  longTermMissionStateBound?: boolean;
+}
+
+// ─── EPISTEMIC SEPARATION QUAD & BOUNDED OPERATIONAL ENVELOPE (BOE) ──────────
+
+export type EpistemicTier =
+  | "MEASURED"     // Direct physical sensor observation
+  | "ESTIMATED"    // Observer / Kalman / reconstructed state
+  | "SIMULATED"    // Forward twin model / PDE prediction
+  | "RECOMMENDED"; // Agent / optimizer candidate action
+
+export interface EpistemicObject<T = any> {
+  id: string;
+  variableName: string;
+  value: T;
+  units: string;
+  tier: EpistemicTier;
+  provenance: {
+    sourceId: string; // Sensor ID, Estimator ID, Twin run ID, or Agent ID
+    timestamp: string;
+    confidenceBounds?: [number, number];
+    sampleFrequencyHz?: number;
+  };
+  immutableSignature: string;
+}
+
+export interface BoundedOperationalEnvelope {
+  id: string;
+  name: string;
+  authorizedBy: string; // Sovereign Human Operator identity
+  authorizedAt: string;
+  domain: string;
+  version: string;
+  stateBounds: Array<{
+    variable: string;
+    units: string;
+    min: number;
+    max: number;
+    criticalEmergencyThreshold: number;
+    rateLimitPerSecond?: number;
+  }>;
+  reflexLoopFrequencyHz: number; // e.g. 50-100Hz (10-20ms)
+  failClosedAction: "STOP" | "SCRAM" | "QUENCH_TO_SAFE_IDLE";
+  authorityInvariant: "Authority defines the permissible state-space (Omega_safe). Machine executes deterministic reflex control inside it, but may never redefine it.";
+}
+
+export interface ReflexControlCycle {
+  cycleId: string;
+  timestamp: string;
+  measuredState: EpistemicObject<number>;
+  estimatedCoreState: EpistemicObject<number>;
+  simulatedTrajectory: EpistemicObject<number>;
+  agentRecommendedAction: EpistemicObject<number>;
+  policyVerified: boolean;
+  insideEnvelope: boolean;
+  executionAction: "ACTUATE_REFLEX" | "DETERMINISTIC_STOP";
+  latencyMs: number;
+  ledgerCommitHash: string;
+}
+
+export interface SubstrateReviewRecord {
+  id: string;
+  title: string;
+  sourceMatter: string;
+  authorizingEntity: string;
+  timestamp: string;
+  disposition: "ADAPT" | "ADOPT" | "HOLD" | "REJECT";
+  domainGeneralizations: {
+    commonKernelVsMachineSpecific: string;
+    simulationPreDeploymentReasoning: string;
+    stateEstimationToFeedbackLoop: string;
+    deterministicSafetySeparatedFromAI: string;
+    constraintEnforcementFailClosed: string;
+    provenanceRequirements: string;
+    humanAuthorityBoundaries: string;
+    crossTerrainModularity: string;
+  };
+  epistemicAudit: {
+    observed: string[];
+    derived: string[];
+    analogy: string[];
+    speculativeRejected: string[];
+  };
+  sovereignKernelTest: {
+    formula: string;
+    invariant: string;
+    timescaleDecoupling: string;
+  };
+  minimumArchitecturalChange: string;
 }
 
 // Legacy compatibility aliases if required

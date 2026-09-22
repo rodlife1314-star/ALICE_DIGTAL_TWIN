@@ -43,6 +43,7 @@ import {
 } from "../types";
 import { computeDeterministicMetonicKinematics, MetonicKinematicVerificationResult } from "../lib/deterministicKinematics";
 import { SimulationInterface } from "./SimulationInterface";
+import { GeometricArchitectureView } from "./GeometricArchitectureView";
 
 interface SimulationViewProps {
   twin: DigitalTwin;
@@ -69,6 +70,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
 
   // Deterministic Mathematical Verification state
   const [inspectingDeterministic, setInspectingDeterministic] = useState(false);
+  const [inspectingGeometric, setInspectingGeometric] = useState(false);
   const [kinematicNominalTeeth, setKinematicNominalTeeth] = useState(38);
   const [kinematicPerturbedTeeth, setKinematicPerturbedTeeth] = useState(39);
   const [kinematicModuleMm, setKinematicModuleMm] = useState(0.5);
@@ -535,7 +537,26 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
         <div className="flex items-center space-x-3 text-xs font-mono">
           <button
             type="button"
-            onClick={() => setInspectingDeterministic(!inspectingDeterministic)}
+            onClick={() => {
+              setInspectingGeometric(!inspectingGeometric);
+              if (!inspectingGeometric) setInspectingDeterministic(false);
+            }}
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded border transition-colors cursor-pointer ${
+              inspectingGeometric
+                ? "bg-[#162230] border-[#2A415E] text-[#509EE3]"
+                : "bg-[#13151A] border-[#22262F] text-[#509EE3] hover:bg-[#1A1D24]"
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>Geometric Architecture G_0 {inspectingGeometric ? "(Active)" : "(Open)"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setInspectingDeterministic(!inspectingDeterministic);
+              if (!inspectingDeterministic) setInspectingGeometric(false);
+            }}
             className={`flex items-center space-x-2 px-3 py-1.5 rounded border transition-colors cursor-pointer ${
               inspectingDeterministic
                 ? "bg-[#1E2E22] border-[#2D5A38] text-[#4ADE80]"
@@ -572,8 +593,15 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
         </div>
       )}
 
+      {/* Geometric Architecture Substrate ($G_0$ Hexagon & Dimensionless Ratio Optimization) */}
+      {inspectingGeometric && (
+        <div className="animate-fadeIn">
+          <GeometricArchitectureView />
+        </div>
+      )}
+
       {/* Main Simulation Interface for Antikythera if selected */}
-      {!inspectingDeterministic && twin.id.includes("antikythera") && (
+      {!inspectingGeometric && !inspectingDeterministic && twin.id.includes("antikythera") && (
         <SimulationInterface
           baselineState={{
             name: startingState || "Initial Baseline State",

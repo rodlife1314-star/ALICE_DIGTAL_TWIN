@@ -144,7 +144,16 @@ export const SYSTEM_CAPABILITY_REGISTRY: ModelCapability[] = [
     ],
     costPer1kTokens: 0.00015,
     maxContextTokens: 1000000,
-    activeStatus: "available"
+    activeStatus: "available",
+    observed_task_success: 97.2,
+    escalation_target: "gemini-1.5-pro",
+    cache_affinity: 84.5,
+    measured_cost_per_completed_task: 0.00042,
+    routerEscalationRule: {
+      difficultyThreshold: "HARD",
+      escalateOnFailure: true,
+      fallbackRailId: "open-source-vllm-mistral"
+    }
   },
   {
     id: "openai-reasoning-sol",
@@ -173,7 +182,15 @@ export const SYSTEM_CAPABILITY_REGISTRY: ModelCapability[] = [
     ],
     costPer1kTokens: 0.0003,
     maxContextTokens: 128000,
-    activeStatus: "available"
+    activeStatus: "available",
+    observed_task_success: 95.8,
+    escalation_target: "gemini-3.5-flash",
+    cache_affinity: 78.0,
+    measured_cost_per_completed_task: 0.00115,
+    routerEscalationRule: {
+      difficultyThreshold: "HARD",
+      escalateOnFailure: false
+    }
   },
   {
     id: "nvidia-nim-physics",
@@ -201,7 +218,16 @@ export const SYSTEM_CAPABILITY_REGISTRY: ModelCapability[] = [
     ],
     costPer1kTokens: 0.0005,
     maxContextTokens: 128000,
-    activeStatus: "available"
+    activeStatus: "available",
+    observed_task_success: 99.1,
+    escalation_target: "rapids-cudf-sweep",
+    cache_affinity: 92.0,
+    measured_cost_per_completed_task: 0.00085,
+    routerEscalationRule: {
+      difficultyThreshold: "CRITICAL",
+      escalateOnFailure: true,
+      fallbackRailId: "physics-pde-solver-v2"
+    }
   },
   {
     id: "rapids-cudf-sweep",
@@ -230,7 +256,16 @@ export const SYSTEM_CAPABILITY_REGISTRY: ModelCapability[] = [
     ],
     costPer1kTokens: 0.0,
     maxContextTokens: 64000,
-    activeStatus: "available"
+    activeStatus: "available",
+    observed_task_success: 99.8,
+    escalation_target: "physics-pde-solver-v2",
+    cache_affinity: 95.0,
+    measured_cost_per_completed_task: 0.00010,
+    routerEscalationRule: {
+      difficultyThreshold: "CRITICAL",
+      escalateOnFailure: true,
+      fallbackRailId: "physics-pde-solver-v2"
+    }
   },
   {
     id: "open-source-vllm-mistral",
@@ -249,16 +284,62 @@ export const SYSTEM_CAPABILITY_REGISTRY: ModelCapability[] = [
       bandwidthMbps: 50,
       offlineSupport: true
     },
-    trustScore: 92,
-    supportedDomains: ["physical", "engineered", "biological", "environmental", "hybrid"],
+    trustScore: 91,
+    supportedDomains: ["physical", "engineered", "biological", "environmental", "conceptual", "musical", "hybrid"],
     capabilities: [
       "fast_reasoning",
       "evidence_synthesis",
       "edge_offline"
     ],
     costPer1kTokens: 0.0,
-    maxContextTokens: 64000,
-    activeStatus: "available"
+    maxContextTokens: 32000,
+    activeStatus: "available",
+    observed_task_success: 91.4,
+    escalation_target: "gemini-3.5-flash",
+    cache_affinity: 86.2,
+    measured_cost_per_completed_task: 0.00008,
+    routerEscalationRule: {
+      difficultyThreshold: "MEDIUM",
+      escalateOnFailure: true,
+      fallbackRailId: "local-mistral-7b-q4"
+    }
+  },
+  {
+    id: "jetson-edge-orin",
+    name: "NVIDIA Jetson Orin Nano (Edge Telemetry & Inference)",
+    provider: "Local Edge Runtime",
+    trustState: "APPROVED",
+    latencyMs: {
+      avgMs: 12,
+      p95Ms: 25,
+      rating: "realtime"
+    },
+    hardwareRequirements: {
+      targetDevice: "GPU",
+      minVramGB: 8,
+      recommendedCpuCores: 6,
+      bandwidthMbps: 0,
+      offlineSupport: true
+    },
+    trustScore: 98,
+    supportedDomains: ["engineered", "physical", "environmental"],
+    capabilities: [
+      "edge_offline",
+      "fast_reasoning",
+      "deterministic"
+    ],
+    costPer1kTokens: 0.0,
+    maxContextTokens: 16000,
+    activeStatus: "available",
+    observed_task_success: 98.6,
+    escalation_target: "open-source-vllm-mistral",
+    cache_affinity: 89.0,
+    measured_cost_per_completed_task: 0.00002,
+    routerEscalationRule: {
+      difficultyThreshold: "MEDIUM",
+      escalateOnFailure: true,
+      fallbackRailId: "physics-pde-solver-v2"
+    }
   },
   {
     id: "physics-pde-solver-v2",
@@ -477,6 +558,21 @@ export function selectBestFitModel(
       if (request.requireOffline && model.hardwareRequirements.offlineSupport) {
         score += 10;
         reasons.push("+10 pts: Zero-cloud offline edge capability satisfied.");
+      }
+
+      // Weave Router 2.0 Empirical Bonuses (18 Sept 2026 Brief)
+      if (model.observed_task_success) {
+        const successBonus = Math.round((model.observed_task_success - 90) * 1.5);
+        if (successBonus > 0) {
+          score += successBonus;
+          reasons.push(`+${successBonus} pts: Empirical task success rate (${model.observed_task_success}%).`);
+        }
+      }
+
+      if (model.cache_affinity && model.cache_affinity > 80) {
+        const cacheBonus = Math.round((model.cache_affinity - 80) / 2);
+        score += cacheBonus;
+        reasons.push(`+${cacheBonus} pts: Cache affinity / KV-reuse bonus (${model.cache_affinity}%).`);
       }
 
       reasons.push(`Base Trust Score: ${model.trustScore}% [Trust State: ${model.trustState || "UNVERIFIED"}]`);
