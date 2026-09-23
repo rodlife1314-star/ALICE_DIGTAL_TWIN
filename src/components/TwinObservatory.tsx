@@ -109,6 +109,14 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
     serviceCovers: 40,
     isAllergenQuarantined: true,
 
+    // Aerial Vehicle parameters
+    airspeedMps: 14.2,
+    angleAttackDeg: 3.4,
+    altitudeAglM: 120.0,
+    crosswindGustMps: 2.5,
+    throttlePct: 65,
+    isOctagonArmed: true,
+
     // Multi-scale viewing parameters
     explodedFactor: 0.0,
     sectionalCutPlane: "NONE",
@@ -174,6 +182,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
     setOperatorParams(prev => ({ ...prev, [key]: val }));
   };
 
+  const isAerial = twin.id === "aerial-vehicle-01" || twin.id.includes("aerial") || twin.name.includes("AERIAL") || twin.domain === "engineered";
   const isMembrane = twin.id === "intelligent-protective-membrane-07" || twin.name.includes("Membrane");
   const isAntikythera = twin.id === "antikythera-mechanism-01" || twin.name.includes("Antikythera");
   const isTermite = twin.id === "termite-colony-01" || twin.name.includes("Termite");
@@ -188,6 +197,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
 
   // Determine active physics domain for NVIDIA compute
   const getPhysicsDomainForTwin = () => {
+    if (isAerial) return "bio_aerodynamics";
     if (isCooled) return "thermal_radiation";
     if (isMembrane) return "electrochemistry";
     if (isAntikythera) return "kinematics";
@@ -985,6 +995,159 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                     />
                     <span className="font-bold">Enforce Allergen Isolation Ring</span>
                   </label>
+                </div>
+              </div>
+            )}
+
+            {/* Aerial Vehicle-specific Controls */}
+            {isAerial && (
+              <div className="space-y-3">
+                {/* Octagon Sovereign Safety Gate Indicator & Switch */}
+                <div className="p-2.5 rounded bg-[#1C1F28] border border-[#10B981]/40 space-y-1.5">
+                  <div className="flex justify-between items-center text-[10px] text-[#10B981] font-bold uppercase">
+                    <span>OCTAGON SOVEREIGN FLIGHT GOVERNOR:</span>
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono ${
+                      operatorParams.isOctagonArmed 
+                        ? (operatorParams.angleAttackDeg > 13.5 || operatorParams.airspeedMps < 9.5 ? "bg-red-950 text-red-400 border border-red-800" : "bg-emerald-950 text-emerald-400 border border-emerald-800")
+                        : "bg-amber-950 text-amber-400 border border-amber-800"
+                    }`}>
+                      {operatorParams.isOctagonArmed 
+                        ? (operatorParams.angleAttackDeg > 13.5 || operatorParams.airspeedMps < 9.5 ? "BREACH FLOW STALL" : "ARMED (x_t ∈ Ω_safe)")
+                        : "DISARMED BY OPERATOR"}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 pt-1">
+                    <button
+                      onClick={() => updateParam("isOctagonArmed", true)}
+                      className={`p-1.5 rounded text-[10px] font-bold border transition-colors cursor-pointer text-center ${
+                        operatorParams.isOctagonArmed
+                          ? "bg-emerald-600 text-black border-emerald-400 font-extrabold shadow-md"
+                          : "bg-[#12141A] text-[#8A8F9A] border-[#2A2E39] hover:text-[#E6E4DF]"
+                      }`}
+                    >
+                      ARMED
+                      <span className="block text-[8px] opacity-80">Containment Bound</span>
+                    </button>
+                    <button
+                      onClick={() => updateParam("isOctagonArmed", false)}
+                      className={`p-1.5 rounded text-[10px] font-bold border transition-colors cursor-pointer text-center ${
+                        !operatorParams.isOctagonArmed
+                          ? "bg-amber-600 text-white border-amber-400 font-extrabold shadow-md"
+                          : "bg-[#12141A] text-[#8A8F9A] border-[#2A2E39] hover:text-[#E6E4DF]"
+                      }`}
+                    >
+                      DISARM
+                      <span className="block text-[8px] opacity-80">Manual Bypass</span>
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-[#A0A4AB] leading-tight">
+                    {operatorParams.isOctagonArmed
+                      ? "Octagon sovereign governor bounds all flight vectors within safe stall, altitude, and thermal margins. Fail-closed: Return-To-Home glide."
+                      : "Operator bypass active. Autonomous routines will proceed without bounded envelope enforcement."}
+                  </p>
+                </div>
+
+                {/* Airspeed (TAS) */}
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
+                    <span>INDICATED AIRSPEED (TAS)</span>
+                    <span className={`font-bold ${operatorParams.airspeedMps < 9.5 ? "text-red-400" : "text-[#38BDF8]"}`}>
+                      {operatorParams.airspeedMps} m/s
+                      {operatorParams.airspeedMps < 9.5 && " (STALL HAZARD)"}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={8.0}
+                    max={26.0}
+                    step={0.2}
+                    value={operatorParams.airspeedMps}
+                    onChange={(e) => updateParam("airspeedMps", Number(e.target.value))}
+                    className="w-full accent-[#38BDF8] cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[8px] text-[#606572] mt-0.5">
+                    <span>Stall: 9.5 m/s</span>
+                    <span>Nominal: 14.2 m/s</span>
+                    <span>Sprint: 24.0 m/s</span>
+                  </div>
+                </div>
+
+                {/* Angle of Attack (AoA) */}
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
+                    <span>ANGLE OF ATTACK (AoA)</span>
+                    <span className={`font-bold ${operatorParams.angleAttackDeg > 13.5 ? "text-red-400" : "text-[#F59E0B]"}`}>
+                      {operatorParams.angleAttackDeg}°
+                      {operatorParams.angleAttackDeg > 13.5 && " (FLOW SEPARATION)"}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={-2.0}
+                    max={16.0}
+                    step={0.2}
+                    value={operatorParams.angleAttackDeg}
+                    onChange={(e) => updateParam("angleAttackDeg", Number(e.target.value))}
+                    className="w-full accent-[#F59E0B] cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[8px] text-[#606572] mt-0.5">
+                    <span>Cruise: 3.4°</span>
+                    <span>Max L/D: 4.8°</span>
+                    <span>Stall Limit: 13.5°</span>
+                  </div>
+                </div>
+
+                {/* Throttle Percentage */}
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
+                    <span>PROPULSION THROTTLE</span>
+                    <span className={`font-bold ${operatorParams.throttlePct > 90 ? "text-amber-400" : "text-[#10B981]"}`}>
+                      {operatorParams.throttlePct}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={operatorParams.throttlePct}
+                    onChange={(e) => updateParam("throttlePct", Number(e.target.value))}
+                    className="w-full accent-[#10B981] cursor-pointer"
+                  />
+                </div>
+
+                {/* Crosswind Gust */}
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
+                    <span>CROSSWIND GUST COMPONENT</span>
+                    <span className="text-[#A78BFA] font-bold">{operatorParams.crosswindGustMps} m/s</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={15}
+                    step={0.5}
+                    value={operatorParams.crosswindGustMps}
+                    onChange={(e) => updateParam("crosswindGustMps", Number(e.target.value))}
+                    className="w-full accent-[#A78BFA] cursor-pointer"
+                  />
+                </div>
+
+                {/* Altitude AGL */}
+                <div>
+                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
+                    <span>CORRIDOR ALTITUDE AGL</span>
+                    <span className="text-[#38BDF8] font-bold">{operatorParams.altitudeAglM} m</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={20}
+                    max={400}
+                    step={10}
+                    value={operatorParams.altitudeAglM}
+                    onChange={(e) => updateParam("altitudeAglM", Number(e.target.value))}
+                    className="w-full accent-[#38BDF8] cursor-pointer"
+                  />
                 </div>
               </div>
             )}

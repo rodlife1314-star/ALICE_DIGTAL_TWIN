@@ -19,6 +19,18 @@ service cloud.firestore {
       allow delete: if isValidId(twinId);
     }
 
+    match /substrate_deltas/{deltaId} {
+      allow read: if true;
+      allow create, update: if isValidId(deltaId) && request.resource.data.userId is string;
+      allow delete: if isValidId(deltaId);
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow create, update: if isValidId(sessionId) && request.resource.data.userId is string;
+      allow delete: if isValidId(sessionId);
+    }
+
     // Default deny all other paths
     match /{document=**} {
       allow read, write: if false;

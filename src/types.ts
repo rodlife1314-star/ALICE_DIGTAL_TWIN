@@ -868,7 +868,105 @@ export interface SubstrateReviewRecord {
   minimumArchitecturalChange: string;
 }
 
+// ─── ALICE VESSEL & PATHFINDER COGNITION SHARED CONTRACT ─────────────────────
+
+export interface PhysicalAcquisitionProof {
+  hardwareSensorId: string;
+  physicalCalibrationDate: string;
+  rawSampleHash: string;
+  telemetryIngestUri?: string;
+  signalNoiseRatioDb?: number;
+}
+
+export interface VesselModelResultEnvelope<T = any> {
+  envelopeId: string;
+  modelIdentifier: 
+    | "AliceVessel.FieldGeometry"
+    | "AliceVessel.EnergyAccounting"
+    | "AliceVessel.CCV01Engine"
+    | "AliceVessel.VolumetricCavity"
+    | "AliceVessel.TransportMedium"
+    | string;
+  modelVersion: string; // e.g. "a2ddbd0-v1.0"
+  parameters: Record<string, any>; // interface or simulation parameters
+  output: {
+    variable: string;
+    value: T;
+    units: string;
+    tensorShape?: number[];
+    uncertainty?: { min: number; max: number; sigma?: number };
+  };
+  epistemicClass: EpistemicClass;
+  physicalAcquisitionProof?: PhysicalAcquisitionProof;
+  executionDomain: ExecutionDomain;
+  executionReceipt: ExecutionReceipt;
+  publishedAt: string;
+}
+
+export interface CognitionChallengeRecord {
+  challengeId: string;
+  targetEnvelopeId: string;
+  cognitiveModelId: string; // e.g. "Pathfinder.Cognition-Reasoner"
+  epistemicStatus: "INFERRED"; // Always strictly INFERRED, never collapsed to SIMULATED
+  challengeType:
+    | "HYPOTHESIS_TEST"
+    | "BOUNDARY_STRESS"
+    | "COUNTER_EXAMPLE"
+    | "ASSUMPTION_AUDIT"
+    | "ANALOGY_PROJECTION";
+  interpretation: string;
+  challengesRaised: string[];
+  falsificationCriteria: string[];
+  recommendedAction: "HOLD" | "REFINE_EXPERIMENT" | "PROPOSE_TRANSITION" | "REJECT";
+  createdAt: string;
+}
+
+export interface ProposedStateTransition {
+  proposalId: string;
+  sourceEnvelopeId: string;
+  challengeRecordId: string;
+  proposedChange: {
+    targetSystemComponent: string;
+    currentStateVariable: string;
+    currentBaselineValue: any;
+    proposedBaselineValue: any;
+    units: string;
+    rationale: string;
+  };
+  octagonSafetyEvaluation: {
+    evaluatedAt?: string;
+    status: "PENDING" | "CONTAINED_SAFE" | "VIOLATION_BLOCKED";
+    stateContainmentVerified: boolean; // x_t \in \Omega_{safe}
+    invariantsChecked: string[];
+    violations?: string[];
+  };
+  operatorPromotionGate: {
+    requiredAuthority: "SOVEREIGN_HUMAN_OPERATOR";
+    status: "AWAITING_OPERATOR" | "PROMOTED_TO_BASELINE" | "DECLINED";
+    promotedBy?: string;
+    promotedAt?: string;
+    operatorNotes?: string;
+    versionedCommitHash?: string;
+  };
+  createdAt: string;
+}
+
+export interface VersionedSystemLedgerRecord {
+  ledgerIndex: number;
+  timestamp: string;
+  proposalId: string;
+  sourceEnvelopeId: string;
+  promotedBy: string;
+  targetComponent: string;
+  variableName: string;
+  previousValue: any;
+  promotedValue: any;
+  units: string;
+  immutableCommitHash: string;
+}
+
 // Legacy compatibility aliases if required
 export type DigitalTwinModel = DigitalTwin;
 export type DigitalTwinComponent = TwinEntity;
 export type DigitalTwinRelationship = TwinRelationship;
+

@@ -5,6 +5,8 @@ import { evaluateSignalToNoise, DEFAULT_ATTENTION_CONFIG } from "./signalToNoise
 import { getSpatialAdapterForTwin } from "../spatial/SpatialRegistry";
 import { UnsupportedDomainSpatialAdapter } from "../spatial/adapters/UnsupportedDomainSpatialAdapter";
 import { MembraneSpatialAdapter } from "../spatial/adapters/MembraneSpatialAdapter";
+import { AerialVehicleSpatialAdapter } from "../spatial/adapters/AerialVehicleSpatialAdapter";
+import { AERIAL_VEHICLE_TWIN } from "../data/seedAerialTwin";
 import { DigitalTwin } from "../types";
 import { JetsonEdgeModule, JETSON_PROFILES } from "./jetsonEdgeModule";
 import { JEMMA_GROUND_TRUTH_CATALOG, executeJemmaComputerAudit } from "./jemmaRail";
@@ -15,6 +17,16 @@ import {
   getOpenAIProviderStatus,
   OPENAI_PROVIDER_CONFIG
 } from "./openaiReasoningProvider";
+import {
+  calculateApertureMetrics,
+  evaluateTouchDragGesture,
+  evaluateModelRotationGesture,
+  evaluatePinchZoomGesture,
+  clampViewScale,
+  computeGibsonAshbyCoupon,
+  ALICE_TWIN_MODELS,
+  ALICE_TWIN_CORRIDORS
+} from "./aliceTwinOperatorJourney";
 
 console.log("==================================================================");
 console.log("    PATHFINDER DIGITAL TWIN SUBSTRATE — INVARIANT TEST SUITE     ");
@@ -224,6 +236,44 @@ assert(unknownAdapter === UnsupportedDomainSpatialAdapter, "Unknown domain recei
 
 const unsupportedScene = unknownAdapter.buildScene(unknownTwin);
 assert(unsupportedScene.title.includes("Spatial View Unavailable"), "Unsupported domain scene informs operator that 3D spatial adapter is unavailable");
+
+// Aerial Vehicle Spatial Adapter verification
+const aerialAdapter = getSpatialAdapterForTwin(AERIAL_VEHICLE_TWIN);
+assert(aerialAdapter === AerialVehicleSpatialAdapter, "AERIAL-VEHICLE-01 engineered domain routes to AerialVehicleSpatialAdapter");
+
+const aerialScene = aerialAdapter.buildScene(AERIAL_VEHICLE_TWIN, {}, 2);
+assert(aerialScene.title.includes("AERIAL-VEHICLE-01"), "Aerial vehicle spatial scene builds with correct twin identity");
+assert(aerialScene.nodes.length >= 10, "Aerial vehicle scene contains comprehensive multi-scale node hierarchy");
+
+// Epistemic classification verification
+const pt100Node = aerialScene.nodes.find(n => n.id === "aerial-pt100-rtd-sensor");
+assert(pt100Node !== undefined, "PT100 RTD sensor node present in multi-scale scene");
+assert(pt100Node?.classification === "MEASURED_STATE", "PT100 RTD sensor node strictly classified as MEASURED_STATE");
+assert(pt100Node?.provenanceRef?.evidenceId === "RCPT-EDGE-JETSON-20260918-001", "PT100 node links to Jetson Orin Nano hardware receipt");
+
+const airframeNode = aerialScene.nodes.find(n => n.id === "aerial-center-fuselage");
+assert(airframeNode?.classification === "EVIDENCE_SUPPORTED_RECONSTRUCTION", "Airframe geometry classified as EVIDENCE_SUPPORTED_RECONSTRUCTION");
+
+const octagonBoundaryNode = aerialScene.nodes.find(n => n.id === "aerial-octagon-safety-geofence");
+assert(octagonBoundaryNode?.classification === "ILLUSTRATIVE_BOUNDARY", "Octagon safety envelope classified as ILLUSTRATIVE_BOUNDARY");
+
+const claudiaRouteNode = aerialScene.nodes.find(n => n.id === "aerial-claudia-inferred-route");
+assert(claudiaRouteNode?.classification === "MODEL_INFERRED_STRUCTURE", "Claudia waypoint corridor classified as MODEL_INFERRED_STRUCTURE");
+
+// Aerodynamic simulation and operator change verification
+const nominalChange = aerialAdapter.applyOperatorChange({ airspeedMps: 14.2, angleAttackDeg: 3.4, isOctagonArmed: true }, aerialScene);
+assert(nominalChange.snrStatus === "SURFACE", "Nominal cruise state produces SURFACE signal-to-noise status");
+assert(nominalChange.calculatedMetrics.stallStatus === "NOMINAL", "Nominal cruise is within aerodynamic bounds");
+
+const stallAoAChange = aerialAdapter.applyOperatorChange({ angleAttackDeg: 15.0 }, aerialScene);
+assert(stallAoAChange.snrStatus === "STOP", "Exceeding stall AoA (>13.5°) triggers STOP signal status");
+assert(stallAoAChange.governanceAlert?.includes("STALL"), "Exceeding stall AoA generates critical stall governance alert");
+
+const stallSpeedChange = aerialAdapter.applyOperatorChange({ airspeedMps: 8.0 }, aerialScene);
+assert(stallSpeedChange.snrStatus === "STOP", "Sub-stall airspeed (<9.5 m/s) triggers STOP status");
+
+const disarmOctagonChange = aerialAdapter.applyOperatorChange({ isOctagonArmed: false }, aerialScene);
+assert(disarmOctagonChange.snrStatus === "HOLD", "Disarming Octagon governor triggers HOLD alert");
 
 // ── TEST GROUP 6: JETSON EDGE HARDWARE DISCOVERY & RECEIPT GENERATION ────────
 console.log("\n[TEST GROUP 6: Jetson Edge Hardware Discovery & Attestation]");
@@ -579,6 +629,94 @@ assert(providerStatus.bound_to === "SIMON", "Provider status confirms bound stri
 assert(providerStatus.audit === "JEMMA", "Provider status confirms JEMMA audit rail");
 assert(providerStatus.policy_boundary === "OCTAGON", "Provider status confirms OCTAGON policy boundary");
 assert(!("key" in providerStatus) && !("apiKey" in providerStatus) && !("secret" in providerStatus), "Provider status never leaks API key or secret properties");
+
+// ── TEST GROUP 12: ALICE TWIN OPERATOR JOURNEY & DETERMINISTIC COCKPIT SLICE ─
+console.log("\n[TEST GROUP 12: Alice Twin Operator Journey & Deterministic Cockpit Slice]");
+
+// Test 1: Nominal symmetric coaxial baseline (dr = 0 mm)
+const nominalAperture = calculateApertureMetrics(0, 0, 45.0, 175.0, 2.80);
+assert(nominalAperture.offsetRadiusMm === 0.0, "Nominal aperture radial offset is exactly 0.00 mm");
+assert(nominalAperture.transverseThrustN === 0.0, "Nominal transverse thrust is exactly 0.0 N under G6 hexagonal symmetry");
+assert(nominalAperture.maxwellTorqueNm === 0.0, "Nominal Maxwell stress torque is exactly 0.0 N·m");
+assert(nominalAperture.standingWaveRatio === 1.05, "Nominal cavity SWR is 1.05:1");
+assert(nominalAperture.axialMomentumFluxKn === 84.2, "Nominal axial Poynting momentum flux is 84.2 kN");
+assert(nominalAperture.symmetryCondition === "SYMMETRIC_COAXIAL", "Zero offset classified as SYMMETRIC_COAXIAL");
+assert(nominalAperture.operationalMode === "cruise_gamma_0", "Zero offset operates in cruise_gamma_0 mode");
+assert(nominalAperture.octagonContainment === "CONTAINED_WITHIN_OMEGA_SAFE", "Nominal state is safely contained within Omega_safe boundary");
+assert(nominalAperture.omegaSafeMarginPercent === 100, "Nominal state has 100% containment margin");
+assert(nominalAperture.nodalPowerDistribution.every(p => p >= 5.0 && p <= 5.4), "Nominal nodal power distribution is uniform across all 6 receivers (~5.2W)");
+
+// Test 2: Bounded parameter touch perturbation (dx = 14px, dy = 0px => dr = 10.50 mm)
+const perturbedAperture = calculateApertureMetrics(14, 0, 45.0, 175.0, 2.80);
+assert(perturbedAperture.offsetRadiusMm === 10.5, "Perturbed radial displacement evaluates to exactly 10.50 mm (14px * 0.75mm/px)");
+assert(perturbedAperture.standingWaveRatio === 1.45, "Perturbed SWR rises deterministically to 1.45:1");
+assert(perturbedAperture.axialMomentumFluxKn === 76.53, "Perturbed axial flux drops deterministically to 76.53 kN");
+assert(perturbedAperture.transverseThrustN === 11.34, "Transverse thrust evaluates to 11.34 N based on Maxwell cavity shear");
+assert(perturbedAperture.maxwellTorqueNm === 4.52, "Maxwell torque evaluates to 4.52 N·m");
+assert(perturbedAperture.symmetryCondition === "ASYMMETRIC_VECTORING", "Displacement >= 1.0 mm transitions to ASYMMETRIC_VECTORING");
+assert(perturbedAperture.operationalMode === "vectoring_gamma_delta", "Displacement operates in vectoring_gamma_delta mode");
+assert(perturbedAperture.octagonContainment === "CONTAINED_WITHIN_OMEGA_SAFE", "10.50 mm is contained within Omega_safe boundary limit (15.0 mm)");
+assert(perturbedAperture.omegaSafeMarginPercent === 30, "Containment margin reflects remaining 30% of safe aperture travel");
+
+// Test 3: Octagon boundary trip enforcement (> 15.0 mm)
+const breachAperture = calculateApertureMetrics(24, 0, 45.0, 175.0, 2.80);
+assert(breachAperture.offsetRadiusMm === 18.0, "24px displacement evaluates to 18.0 mm");
+assert(breachAperture.octagonContainment === "BREACH_CRITICAL_TRIP", "Aperture > 15.0 mm triggers BREACH_CRITICAL_TRIP");
+assert(breachAperture.omegaSafeMarginPercent === 0, "Breached state has 0% safe margin");
+
+// Test 4: Touch drag discrimination & axis lock invariants
+const subThresholdGesture = evaluateTouchDragGesture(100, 200, 110, 205, 18);
+assert(subThresholdGesture.shouldDrag === false && subThresholdGesture.isScrollDominant === false, "Touch gesture below 18px threshold (11.18px) is rejected as tap/noise");
+
+const verticalScrollGesture = evaluateTouchDragGesture(100, 200, 106, 235, 18);
+assert(verticalScrollGesture.shouldDrag === false && verticalScrollGesture.isScrollDominant === true, "Vertical dominant swipe (|dy|=35px > |dx|=6px) enables scrolling and rejects aperture drag");
+
+const horizontalDragGesture = evaluateTouchDragGesture(100, 200, 126, 204, 18);
+assert(horizontalDragGesture.shouldDrag === true && horizontalDragGesture.isScrollDominant === false, "Horizontal dominant gesture (|dx|=26px >= 18px) passes threshold and locks aperture steering");
+
+// Test 5: Pinch-to-zoom view scale clamping & gesture invariants [0.75, 1.70]
+assert(clampViewScale(0.40) === 0.75, "Pinch zoom out clamps strictly at minimum 0.75x");
+assert(clampViewScale(2.35) === 1.70, "Pinch zoom in clamps strictly at maximum 1.70x");
+assert(clampViewScale(1.15) === 1.15, "Pinch zoom within range preserves scale (1.15x)");
+
+const pinchZoomOut = evaluatePinchZoomGesture(100, 80, 1.0);
+assert(pinchZoomOut.isPinching === true && pinchZoomOut.newScale === 0.8, "Pinch zoom out calculates scale 0.80 correctly");
+
+const pinchZoomClamped = evaluatePinchZoomGesture(100, 250, 1.0);
+assert(pinchZoomClamped.isPinching === true && pinchZoomClamped.newScale === 1.70, "Pinch zoom in clamps strictly at max 1.70x");
+
+const jitterPinch = evaluatePinchZoomGesture(5, 6, 1.0, 12);
+assert(jitterPinch.isPinching === false && jitterPinch.newScale === 1.0, "Sub-threshold pinch (<12px) is rejected as jitter");
+
+// Test 5b: 3D Model Rotation Gesture Invariants (Yaw & Pitch)
+const initialRot = { yawDeg: 0, pitchDeg: 0 };
+const subThresholdRot = evaluateModelRotationGesture(100, 100, 110, 105, initialRot, 18);
+assert(subThresholdRot.isEngaged === false, "3D rotation gesture below 18px threshold (11.18px) is rejected");
+
+const engagedRot = evaluateModelRotationGesture(100, 100, 150, 80, initialRot, 18, 0.45);
+assert(engagedRot.isEngaged === true, "3D rotation gesture >= 18px threshold engages rotation");
+assert(engagedRot.yawDeg === 22.5, "Yaw evaluates to +22.5° (50px * 0.45 deg/px)");
+assert(engagedRot.pitchDeg === 9.0, "Pitch evaluates to +9.0° (-(-20px) * 0.45 deg/px)");
+
+const clampedPitchRot = evaluateModelRotationGesture(100, 100, 100, -100, initialRot, 18, 0.45);
+assert(clampedPitchRot.pitchDeg === 60.0, "Excess upward tilt clamps strictly to +60.0° elevation ceiling");
+
+const clampedDownPitchRot = evaluateModelRotationGesture(100, 100, 100, 300, initialRot, 18, 0.45);
+assert(clampedDownPitchRot.pitchDeg === -60.0, "Excess downward tilt clamps strictly to -60.0° elevation floor");
+
+// Test 6: Gibson–Ashby cellular solid mechanics on the Workbench
+const honeycombCoupon = computeGibsonAshbyCoupon(0.28, "honeycomb", 72.0);
+assert(honeycombCoupon.modulusRatio === 0.224, "Honeycomb modulus ratio E*/Es is 0.8 * 0.28 = 0.224");
+assert(honeycombCoupon.effectiveModulusGpa === 16.13, "Honeycomb effective modulus with Aluminium Es=72GPa is 16.13 GPa");
+assert(honeycombCoupon.epistemicClass === "SIMULATED_BEHAVIOUR", "Gibson-Ashby scaling is classified as SIMULATED_BEHAVIOUR");
+
+const foamCoupon = computeGibsonAshbyCoupon(0.28, "open_cell_foam", 72.0);
+assert(foamCoupon.modulusRatio === 0.0784, "Open-cell bending foam obeys quadratic scaling (0.28^2 = 0.0784)");
+
+// Test 7: Epistemic classification invariants & physical receipt anchor
+assert(ALICE_TWIN_MODELS.g6_coaxial_cavity.primaryEpistemicAnchor.epistemicClass === "MEASURED", "Physical bench RTD receipt is anchored to MEASURED");
+assert(ALICE_TWIN_MODELS.aerial_vehicle_01.primaryEpistemicAnchor.receiptId === "RCPT-EDGE-JETSON-20260918-001", "AERIAL-VEHICLE-01 anchored to Jetson Orin Nano hardware receipt");
+assert(ALICE_TWIN_CORRIDORS[0].epistemicClass === "HYPOTHESIS", "Solar wind corridor carrier is strictly HYPOTHESIS");
 
 // ── TEST SUITE SUMMARY ───────────────────────────────────────────────────────
 console.log("\n==================================================================");

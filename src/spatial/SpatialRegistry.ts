@@ -5,6 +5,7 @@ import { AntikytheraSpatialAdapter } from "./adapters/AntikytheraSpatialAdapter"
 import { TermiteNestSpatialAdapter } from "./adapters/TermiteNestSpatialAdapter";
 import { SixesSpatialAdapter } from "./adapters/SixesSpatialAdapter";
 import { CooledSpatialAdapter } from "./adapters/CooledSpatialAdapter";
+import { AerialVehicleSpatialAdapter } from "./adapters/AerialVehicleSpatialAdapter";
 import { UnsupportedDomainSpatialAdapter } from "./adapters/UnsupportedDomainSpatialAdapter";
 
 /**
@@ -20,6 +21,16 @@ export function getSpatialAdapterForTwin(twin: DigitalTwin): DomainSpatialAdapte
   const nameStr = String(twin.name || "").toLowerCase();
   const idStr = String(twin.id || "").toLowerCase();
 
+  if (
+    idStr === "aerial-vehicle-01" ||
+    idStr.includes("aerial") ||
+    domainStr === "engineered" ||
+    domainStr === "aerospace" ||
+    nameStr.includes("aerial") ||
+    nameStr.includes("reconnaissance")
+  ) {
+    return AerialVehicleSpatialAdapter;
+  }
   if (idStr === "intelligent-protective-membrane-07" || domainStr === "materials" || nameStr.includes("membrane")) {
     return MembraneSpatialAdapter;
   }

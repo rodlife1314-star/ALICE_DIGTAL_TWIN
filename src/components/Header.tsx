@@ -12,13 +12,28 @@ import {
   Cpu,
   Clock,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Cloud,
+  LogIn,
+  LogOut,
+  User as UserIcon,
+  Loader2,
+  Box,
+  Radio,
+  Sliders,
+  ShieldCheck,
+  Flame,
+  FileCheck,
+  Zap,
+  BookOpen
 } from "lucide-react";
+import { User } from "firebase/auth";
 import { DigitalTwin } from "../types";
 
 export type WorkspaceTab =
   | "repository"
   | "observatory"
+  | "cockpit_seat"
   | "overview"
   | "structure"
   | "observation"
@@ -29,7 +44,18 @@ export type WorkspaceTab =
   | "capabilities"
   | "compute"
   | "timeline"
-  | "governance";
+  | "governance"
+  // Alice Vessel Modules
+  | "vessel_operator"
+  | "vessel_engine"
+  | "vessel_ccv01"
+  | "vessel_cavity"
+  | "vessel_transport"
+  // Pathfinder Cognition Modules
+  | "cognition_jemma"
+  | "cognition_octagon"
+  | "cognition_delta"
+  | "cognition_simon";
 
 interface HeaderProps {
   twins: DigitalTwin[];
@@ -38,6 +64,11 @@ interface HeaderProps {
   onSelectTwin: (id: string) => void;
   onSelectTab: (tab: WorkspaceTab) => void;
   onOpenNewTwinModal: () => void;
+  user?: User | null;
+  onLogin?: () => void;
+  onLogout?: () => void;
+  isCloudConnected?: boolean;
+  isSigningIn?: boolean;
 }
 
 export function Header({
@@ -46,7 +77,12 @@ export function Header({
   activeTab,
   onSelectTwin,
   onSelectTab,
-  onOpenNewTwinModal
+  onOpenNewTwinModal,
+  user,
+  onLogin,
+  onLogout,
+  isCloudConnected = true,
+  isSigningIn = false
 }: HeaderProps) {
   const activeTwin = twins.find((t) => t.id === activeTwinId) || null;
 
@@ -107,7 +143,16 @@ export function Header({
         </div>
 
         {/* System State & Quick Action */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          {/* Firebase Cloud Sync Status */}
+          <div className="flex items-center space-x-1.5 px-2 py-1 rounded bg-[#10141D] border border-[#1C2536] text-[11px] font-mono">
+            <Cloud className={`w-3.5 h-3.5 ${isCloudConnected ? "text-[#4ADE80]" : "text-[#F59E0B]"}`} />
+            <span className="hidden lg:inline text-[#8A8F9A]">Firestore:</span>
+            <span className={isCloudConnected ? "text-[#4ADE80] font-semibold" : "text-[#F59E0B]"}>
+              {isCloudConnected ? "Live" : "Offline"}
+            </span>
+          </div>
+
           {activeTwin && (
             <div className="hidden md:flex items-center space-x-2 px-2.5 py-1 rounded bg-[#131720] border border-[#1E2533] text-[11px]">
               <span className="w-2 h-2 rounded-full bg-[#509EE3] animate-pulse" />
@@ -130,6 +175,53 @@ export function Header({
               )}
               <span>{activeTwin.integrityStatus}</span>
             </div>
+          )}
+
+          {/* User Auth Control */}
+          {user ? (
+            <div className="flex items-center space-x-2 px-2.5 py-1 rounded bg-[#14171F] border border-[#22252D] text-xs">
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt={user.displayName || "Operator"}
+                  className="w-5 h-5 rounded-full border border-[#C5A059]"
+                />
+              ) : (
+                <UserIcon className="w-3.5 h-3.5 text-[#C5A059]" />
+              )}
+              <span className="hidden xl:inline text-[#FAF9F5] font-mono text-[11px] max-w-[120px] truncate">
+                {user.email || user.displayName || "Operator"}
+              </span>
+              <button
+                onClick={onLogout}
+                title="Sign Out"
+                className="text-[#8A8F9A] hover:text-[#FAF9F5] p-0.5 rounded cursor-pointer transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onLogin}
+              disabled={isSigningIn}
+              className={`flex items-center space-x-1.5 border text-xs px-2.5 py-1.5 rounded transition-colors ${
+                isSigningIn
+                  ? "bg-[#14161C] border-[#22252D] text-[#8A8F9A] cursor-wait"
+                  : "bg-[#1A1E29] hover:bg-[#232938] border-[#2C3345] text-[#E6E4DF] cursor-pointer"
+              }`}
+            >
+              {isSigningIn ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 text-[#C5A059] animate-spin" />
+                  <span className="hidden sm:inline">Signing In...</span>
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-3.5 h-3.5 text-[#C5A059]" />
+                  <span className="hidden sm:inline">Sign In</span>
+                </>
+              )}
+            </button>
           )}
 
           <button
@@ -158,6 +250,13 @@ export function Header({
           active={activeTab === "observatory"}
           onClick={() => onSelectTab("observatory")}
           disabled={!activeTwinId}
+        />
+        <TabButton
+          id="cockpit_seat"
+          label="Cockpit Seat (Mobile HUD)"
+          icon={<Compass className="w-3.5 h-3.5 text-[#C5A059]" />}
+          active={activeTab === "cockpit_seat"}
+          onClick={() => onSelectTab("cockpit_seat")}
         />
         <TabButton
           id="overview"
@@ -193,49 +292,105 @@ export function Header({
         />
         <TabButton
           id="geometry"
-          label="Geometric Architecture (G_0)"
+          label="Geometric Architecture"
           icon={<Compass className="w-3.5 h-3.5 text-[#509EE3]" />}
           active={activeTab === "geometry"}
           onClick={() => onSelectTab("geometry")}
         />
         <TabButton
           id="envelope"
-          label="Evidence Envelope"
+          label="Evidence Envelopes"
           icon={<Shield className="w-3.5 h-3.5 text-[#4ADE80]" />}
           active={activeTab === "envelope"}
           onClick={() => onSelectTab("envelope")}
         />
+
+        {/* Divider: Alice Vessel */}
+        <div className="h-4 w-px bg-[#262B35] mx-1 shrink-0" />
+        <span className="text-[10px] uppercase font-mono tracking-wider text-[#A08850] px-1 font-semibold hidden md:inline shrink-0">
+          Alice Vessel:
+        </span>
+
         <TabButton
-          id="constraints"
-          label="Constraint Discovery"
-          icon={<Compass className="w-3.5 h-3.5" />}
-          active={activeTab === "constraints"}
-          onClick={() => onSelectTab("constraints")}
-          disabled={!activeTwinId}
+          id="vessel_operator"
+          label="Cockpit & Object Stack"
+          icon={<Sliders className="w-3.5 h-3.5 text-[#C5A059]" />}
+          active={activeTab === "vessel_operator"}
+          onClick={() => onSelectTab("vessel_operator")}
         />
         <TabButton
-          id="capabilities"
-          label="Capability Registry"
-          icon={<Settings className="w-3.5 h-3.5" />}
-          active={activeTab === "capabilities"}
-          onClick={() => onSelectTab("capabilities")}
-          disabled={!activeTwinId}
+          id="vessel_engine"
+          label="Engine & Field Modes"
+          icon={<Zap className="w-3.5 h-3.5 text-[#E6A23C]" />}
+          active={activeTab === "vessel_engine"}
+          onClick={() => onSelectTab("vessel_engine")}
         />
+        <TabButton
+          id="vessel_ccv01"
+          label="CCV-01 Vehicle"
+          icon={<Radio className="w-3.5 h-3.5 text-[#67C23A]" />}
+          active={activeTab === "vessel_ccv01"}
+          onClick={() => onSelectTab("vessel_ccv01")}
+        />
+        <TabButton
+          id="vessel_cavity"
+          label="Cavity Transformer"
+          icon={<Box className="w-3.5 h-3.5 text-[#409EFF]" />}
+          active={activeTab === "vessel_cavity"}
+          onClick={() => onSelectTab("vessel_cavity")}
+        />
+        <TabButton
+          id="vessel_transport"
+          label="Transport Medium"
+          icon={<Activity className="w-3.5 h-3.5 text-[#909399]" />}
+          active={activeTab === "vessel_transport"}
+          onClick={() => onSelectTab("vessel_transport")}
+        />
+
+        {/* Divider: Pathfinder Cognition */}
+        <div className="h-4 w-px bg-[#262B35] mx-1 shrink-0" />
+        <span className="text-[10px] uppercase font-mono tracking-wider text-[#509EE3] px-1 font-semibold hidden md:inline shrink-0">
+          Cognition:
+        </span>
+
+        <TabButton
+          id="cognition_jemma"
+          label="Jemma Frictions"
+          icon={<Flame className="w-3.5 h-3.5 text-[#F56C6C]" />}
+          active={activeTab === "cognition_jemma"}
+          onClick={() => onSelectTab("cognition_jemma")}
+        />
+        <TabButton
+          id="cognition_octagon"
+          label="Octagon Safety Gate"
+          icon={<ShieldCheck className="w-3.5 h-3.5 text-[#67C23A]" />}
+          active={activeTab === "cognition_octagon"}
+          onClick={() => onSelectTab("cognition_octagon")}
+        />
+        <TabButton
+          id="cognition_delta"
+          label="Substrate Delta Ledger"
+          icon={<FileCheck className="w-3.5 h-3.5 text-[#409EFF]" />}
+          active={activeTab === "cognition_delta"}
+          onClick={() => onSelectTab("cognition_delta")}
+        />
+        <TabButton
+          id="cognition_simon"
+          label="Cognition Pathways"
+          icon={<BookOpen className="w-3.5 h-3.5 text-[#E6A23C]" />}
+          active={activeTab === "cognition_simon"}
+          onClick={() => onSelectTab("cognition_simon")}
+        />
+
+        {/* Divider: Substrate System Tools */}
+        <div className="h-4 w-px bg-[#262B35] mx-1 shrink-0" />
+
         <TabButton
           id="compute"
-          label="Compute & Science Rail"
+          label="Compute Rail"
           icon={<Cpu className="w-3.5 h-3.5 text-[#C5A059]" />}
           active={activeTab === "compute"}
           onClick={() => onSelectTab("compute")}
-          disabled={!activeTwinId}
-        />
-        <TabButton
-          id="timeline"
-          label="Timeline"
-          icon={<Clock className="w-3.5 h-3.5" />}
-          active={activeTab === "timeline"}
-          onClick={() => onSelectTab("timeline")}
-          disabled={!activeTwinId}
         />
         <TabButton
           id="governance"
@@ -243,7 +398,6 @@ export function Header({
           icon={<Shield className="w-3.5 h-3.5" />}
           active={activeTab === "governance"}
           onClick={() => onSelectTab("governance")}
-          disabled={!activeTwinId}
         />
       </div>
     </header>

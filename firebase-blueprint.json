@@ -27,12 +27,72 @@
         }
       },
       "required": ["id", "name", "domain"]
+    },
+    "SubstrateDelta": {
+      "title": "Substrate Delta",
+      "description": "Audited governance patch, learning dimension, and rule promotion record",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "observation": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "reasoning": {
+          "type": "string"
+        },
+        "learning": {
+          "type": "string"
+        },
+        "internalizedRule": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      },
+      "required": ["userId", "observation", "internalizedRule"]
+    },
+    "PathfinderSession": {
+      "title": "Pathfinder Session",
+      "description": "Active session with evidence documents, inquiry, and selected pathway",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "inquiry": {
+          "type": "string"
+        },
+        "selectedPathwayId": {
+          "type": "string"
+        }
+      },
+      "required": ["userId"]
     }
   },
   "firestore": {
     "/twins/{twinId}": {
       "schema": "DigitalTwin",
       "description": "Collection storing digital twin models and evidence configurations"
+    },
+    "/substrate_deltas/{deltaId}": {
+      "schema": "SubstrateDelta",
+      "description": "Collection storing versioned substrate delta ledger and internalized governance rules"
+    },
+    "/sessions/{sessionId}": {
+      "schema": "PathfinderSession",
+      "description": "Collection storing interactive operator reasoning sessions"
     }
   }
 }
