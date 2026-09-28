@@ -137,7 +137,7 @@ export const ALICE_VESSEL_TWIN: DigitalTwin = {
     {
       id: "st-coaxial-cruise",
       name: "Coaxial Cruise (Gamma 0)",
-      variables: {
+      metrics: {
         radialOffsetMm: 0.0,
         transverseThrustN: 0.0,
         swr: 1.05,
@@ -145,29 +145,27 @@ export const ALICE_VESSEL_TWIN: DigitalTwin = {
         mode: "cruise_gamma_0"
       },
       timestamp: "2026-09-28 10:00",
-      classification: "NOMINAL"
+      active: true
     }
   ],
   observations: [
     {
       id: "obs-cavity-s11",
-      entityId: "ent-field-core",
-      property: "s11_return_loss",
+      fact: "Cavity S11 Return Loss: -24.8 dB at 2.800 GHz (Vector Network Analyzer)",
       value: "-24.8 dB at 2.800 GHz",
-      observedAt: "2026-09-28 09:30",
-      source: "Anritsu Vector Network Analyzer Calibration Run",
-      confidence: 99.4,
-      verifiedBy: "Operator"
+      isFact: true,
+      timestamp: "2026-09-28 09:30",
+      quality: "measured",
+      evidenceClass: "surviving_physical"
     },
     {
       id: "obs-wall-rtd",
-      entityId: "ent-protective-hull",
-      property: "wall_temperature_kelvin",
+      fact: "Wall RTD Sensor Array (BENCH-RTD-4402): 312.4 K steady-state wall temperature",
       value: "312.4 K steady-state",
-      observedAt: "2026-09-28 09:45",
-      source: "Physical Test Bench Wall RTD Sensor Array (BENCH-RTD-4402)",
-      confidence: 99.8,
-      verifiedBy: "Operator"
+      isFact: true,
+      timestamp: "2026-09-28 09:45",
+      quality: "measured",
+      evidenceClass: "surviving_physical"
     }
   ],
   interpretations: [
@@ -184,10 +182,22 @@ export const ALICE_VESSEL_TWIN: DigitalTwin = {
     {
       id: "sim-pde-g6-cruise",
       name: "G6 Hexagonal Cavity Coaxial Cruise Simulation",
-      model: "Finite Element Vector Maxwell Solver v2.4",
-      parameters: { frequencyGhz: 2.80, radiusMm: 175.0, offsetMm: 0.0 },
-      results: { swr: 1.05, axialPoyntingFluxKn: 84.2, transverseThrustN: 0.0 },
-      runAt: "2026-09-28 10:20"
+      startingState: "Coaxial Cruise (Gamma 0)",
+      changedVariables: "Radial aperture offset dr = 0.0 mm (Coaxial baseline)",
+      assumptions: [
+        "Finite Element Vector Maxwell Solver v2.4",
+        "G6 Hexagonal Cavity boundary condition",
+        "2.80 GHz excitation at 175.0 mm radius"
+      ],
+      predictedOutcomes: [
+        "SWR: 1.05:1",
+        "Axial Poynting Flux: 84.2 kN",
+        "Transverse Thrust: 0.0 N"
+      ],
+      divergence: "0.0% divergence from coaxial symmetry",
+      confidence: 99,
+      createdAt: "2026-09-28 10:20",
+      executionStatus: "VALIDATED_EVIDENCE"
     }
   ],
   revisions: [
@@ -270,8 +280,9 @@ export const ALICE_VESSEL_TWIN: DigitalTwin = {
           averageWatts: 14.8,
           batteryImpactMah: 0.06
         },
-        signatures: {
-          hardwareAttestation: "0x789abcde0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        provenance: {
+          timestamp: "2026-09-28 09:30:00Z",
+          sourceNodeId: "ent-field-core",
           immutableSignature: "SIG-ALICE-POYNTING-MEASUREMENT-001",
           operatorAttestation: "Verified by Sovereign Human Operator on Physical Test Bench"
         }
