@@ -55,9 +55,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
   const [startingState, setStartingState] = useState(twin.states[0]?.name || "Nominal Baseline");
   const [changedVars, setChangedVars] = useState("");
   const [assumptionsText, setAssumptionsText] = useState("");
-  const [selectedRail, setSelectedRail] = useState<ComputeRail>(
-    twin.id.includes("cooled") ? "RAPIDS_GPU" : "LOCAL_DETERMINISTIC"
-  );
+  const [selectedRail, setSelectedRail] = useState<ComputeRail>("LOCAL_DETERMINISTIC");
   const [executionMode, setExecutionMode] = useState<"dispatch_immediate" | "propose_only">("dispatch_immediate");
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationError, setSimulationError] = useState<string | null>(null);
@@ -600,39 +598,6 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
         </div>
       )}
 
-      {/* Main Simulation Interface for Antikythera if selected */}
-      {!inspectingGeometric && !inspectingDeterministic && twin.id.includes("antikythera") && (
-        <SimulationInterface
-          baselineState={{
-            name: startingState || "Initial Baseline State",
-            description: "Nominal 235 synodic months / 19 tropical years Metonic transmission baseline",
-            nominalTeeth: 38,
-            targetRatio: "235 / 19 (12.3684 rev/yr)",
-            moduleMm: 0.5,
-            centerDistanceMm: 19.0
-          }}
-          perturbation={{
-            targetGear: "Metonic Transmission Driven Gear (b2/c1 mesh)",
-            nominalTeeth: 38,
-            perturbedTeeth: 39,
-            toothDelta: 1,
-            moduleMm: 0.5,
-            centerDistanceMm: 19.0,
-            targetRelationship: "235 synodic months / 19 tropical years",
-            description: "Perturb effective tooth count of one gear in the Metonic transmission by +1 tooth equivalent while holding all other reconstructed ratios constant.",
-            assumptions: [
-              "235 synodic months / 19 tropical years is the target encoded relationship.",
-              "All non-perturbed gear ratios remain fixed.",
-              "Manufacturing error, friction and backlash are excluded from this first computational test.",
-              "Only kinematic information transfer is being evaluated.",
-              "No result may modify the archaeological evidence state."
-            ]
-          }}
-          onRunSimulation={handleSimulationInterfaceRun}
-          onCommitToLedger={handleCommitVerificationToLedger}
-        />
-      )}
-
       {/* Deterministic Kinematic Verification Layer (Accordion / Panel) */}
       {inspectingDeterministic && (
         <div className="bg-[#0F1218] border-2 border-[#1E3A2B] rounded-lg p-6 space-y-6 shadow-xl animate-fadeIn">
@@ -782,55 +747,37 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
               <span>Sim 002: W/Mo & Hf/Zr Surrogate Screening (Local Rail)</span>
             </button>
           </>
-        ) : twin.id.includes("cooled") ? (
-          <>
-            <button
-              type="button"
-              onClick={() => handleLoadPreset("cooled_sim001")}
-              className="bg-[#1A1D2B] hover:bg-[#232738] border border-[#353D57] text-[#93C5FD] px-2.5 py-1 rounded transition-colors cursor-pointer flex items-center space-x-1.5"
-            >
-              <Snowflake className="w-3.5 h-3.5 text-[#38BDF8]" />
-              <span>Sim 001: Sub-Ambient Envelope Sweep (RAPIDS GPU Rail)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleLoadPreset("cooled_sim002")}
-              className="bg-[#1A1D2B] hover:bg-[#232738] border border-[#353D57] text-[#C084FC] px-2.5 py-1 rounded transition-colors cursor-pointer flex items-center space-x-1.5"
-            >
-              <Zap className="w-3.5 h-3.5 text-[#A855F7]" />
-              <span>Sim 002: UV Whitening & Processing Ablation (NVIDIA Rail)</span>
-            </button>
-          </>
         ) : (
           <>
             <button
               type="button"
-              onClick={() => handleLoadPreset("antikythera_sim001")}
+              onClick={() => {
+                setScenarioName("Simulation 001: G6 Hexagonal Coaxial Cruise (84.2 kN Poynting Flux)");
+                setStartingState("Coaxial Cruise (Gamma 0)");
+                setChangedVars("Lock aperture radial offset dr = 0.0 mm. Evaluate standing wave ratio and axial flux.");
+                setAssumptionsText("G6 hexagonal boundary symmetry.\nRF source 2.80 GHz at 45 kW excitation.\nZero transverse shear.");
+                setSelectedRail("LOCAL_DETERMINISTIC");
+                setExecutionMode("dispatch_immediate");
+              }}
               className="bg-[#191D28] hover:bg-[#222736] border border-[#2C344A] text-[#C5A059] px-2.5 py-1 rounded transition-colors cursor-pointer flex items-center space-x-1.5"
             >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Sim 001: Metonic Ratio (Local Rail)</span>
+              <Zap className="w-3.5 h-3.5 text-[#C5A059]" />
+              <span>Sim 001: G6 Coaxial Cruise (Local Rail)</span>
             </button>
             <button
               type="button"
-              onClick={() => handleLoadPreset("antikythera_sim002")}
-              className="bg-[#191D28] hover:bg-[#222736] border border-[#2C344A] text-[#93C5FD] px-2.5 py-1 rounded transition-colors cursor-pointer"
+              onClick={() => {
+                setScenarioName("Simulation 002: Asymmetric Poynting Vectoring Sweep");
+                setStartingState("Coaxial Cruise (Gamma 0)");
+                setChangedVars("Perturb aperture radial offset to dr = 10.5 mm. Evaluate transverse Maxwell shear and SWR margin.");
+                setAssumptionsText("Omega_safe boundary limit dr <= 15.0 mm.\nPermitted SWR <= 1.50:1.\nTransverse thrust calculation.");
+                setSelectedRail("LOCAL_DETERMINISTIC");
+                setExecutionMode("dispatch_immediate");
+              }}
+              className="bg-[#191D28] hover:bg-[#222736] border border-[#2C344A] text-[#93C5FD] px-2.5 py-1 rounded transition-colors cursor-pointer flex items-center space-x-1.5"
             >
-              Sim 002: Backlash & Deadband
-            </button>
-            <button
-              type="button"
-              onClick={() => handleLoadPreset("antikythera_sim003")}
-              className="bg-[#191D28] hover:bg-[#222736] border border-[#2C344A] text-[#F59E0B] px-2.5 py-1 rounded transition-colors cursor-pointer"
-            >
-              Sim 003: Tooth-Division Error
-            </button>
-            <button
-              type="button"
-              onClick={() => handleLoadPreset("antikythera_sim004")}
-              className="bg-[#191D28] hover:bg-[#222736] border border-[#2C344A] text-[#4ADE80] px-2.5 py-1 rounded transition-colors cursor-pointer"
-            >
-              Sim 004: Bronze Friction & Torque
+              <Shield className="w-3.5 h-3.5 text-[#93C5FD]" />
+              <span>Sim 002: Vectoring Sweep (Local Rail)</span>
             </button>
           </>
         )}

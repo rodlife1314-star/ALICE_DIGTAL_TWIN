@@ -183,11 +183,9 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
   };
 
   const isAerial = twin.id === "aerial-vehicle-01" || twin.id.includes("aerial") || twin.name.includes("AERIAL") || twin.domain === "engineered";
+  const isVessel = twin.id === "alice-vessel-ccv01" || twin.id.includes("vessel");
   const isMembrane = twin.id === "intelligent-protective-membrane-07" || twin.name.includes("Membrane");
-  const isAntikythera = twin.id === "antikythera-mechanism-01" || twin.name.includes("Antikythera");
-  const isTermite = twin.id === "termite-colony-01" || twin.name.includes("Termite");
   const isSixes = twin.id === "project-sixes-culinary-08" || twin.name.includes("SIXES");
-  const isCooled = twin.id.includes("cooled") || twin.name.includes("COOLed");
 
   const formatHours = (hrs: number) => {
     const h = Math.floor(hrs);
@@ -197,12 +195,10 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
 
   // Determine active physics domain for NVIDIA compute
   const getPhysicsDomainForTwin = () => {
-    if (isAerial) return "bio_aerodynamics";
-    if (isCooled) return "thermal_radiation";
+    if (isVessel || isAerial) return "bio_aerodynamics";
     if (isMembrane) return "electrochemistry";
-    if (isAntikythera) return "kinematics";
-    if (isTermite) return "bio_aerodynamics";
-    return "fluid_emulsion";
+    if (isSixes) return "fluid_emulsion";
+    return "electrochemistry";
   };
 
   // Execute NVIDIA Spatial Compute
@@ -524,46 +520,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
         </div>
       </div>
 
-      {/* Transient Diurnal Time Scrubber (for physical / thermodynamic / biological systems) */}
-      {(isCooled || isTermite) && (
-        <div className="bg-[#13151A] border border-[#262B35] rounded-lg p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-xs">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-[#1E232E] rounded border border-[#2B303C] text-[#C5A059]">
-              <Clock className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-[10px] text-[#8A8F9A] uppercase font-bold">Transient Diurnal Timeline</div>
-              <div className="text-sm font-bold text-[#E6E4DF] flex items-center space-x-2">
-                <span>{formatHours(operatorParams.timeOfDayHours)}</span>
-                <span className="text-[10px] text-[#8A8F9A] font-normal">
-                  {operatorParams.timeOfDayHours >= 6 && operatorParams.timeOfDayHours <= 18 ? "(Daylight Solar Heating)" : "(Nocturnal Radiative Cooling)"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 max-w-xl flex items-center space-x-3">
-            <button
-              onClick={() => setIsDiurnalPlaying(!isDiurnalPlaying)}
-              className={`p-2 rounded font-mono text-[11px] font-bold flex items-center space-x-1.5 cursor-pointer ${
-                isDiurnalPlaying ? "bg-[#EF4444] text-white" : "bg-[#509EE3] text-[#0D0E11]"
-              }`}
-            >
-              {isDiurnalPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-              <span>{isDiurnalPlaying ? "PAUSE CYCLE" : "PLAY 24H"}</span>
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={23.9}
-              step={0.1}
-              value={operatorParams.timeOfDayHours}
-              onChange={(e) => updateParam("timeOfDayHours", Number(e.target.value))}
-              className="w-full accent-[#509EE3] cursor-pointer"
-            />
-          </div>
-        </div>
-      )}
+      {/* Diurnal Timeline (when applicable) */}
 
       {/* Governance Invariant Alert Banner */}
       {governanceNotice && (
@@ -711,104 +668,6 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
               <span className="text-[10px] text-[#8A8F9A]">Intervene</span>
             </div>
 
-            {/* COOLed Specific Controls */}
-            {isCooled && (
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
-                    <span className="flex items-center space-x-1">
-                      <Thermometer className="w-3 h-3 text-[#F87171]" />
-                      <span>BASE AMBIENT TEMP</span>
-                    </span>
-                    <span className="text-[#F87171] font-bold">{operatorParams.ambientTempC}°C</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={15}
-                    max={48}
-                    step={0.5}
-                    value={operatorParams.ambientTempC}
-                    onChange={(e) => updateParam("ambientTempC", Number(e.target.value))}
-                    className="w-full accent-[#F87171] cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
-                    <span className="flex items-center space-x-1">
-                      <Sun className="w-3 h-3 text-[#F59E0B]" />
-                      <span>PEAK SOLAR IRRADIANCE</span>
-                    </span>
-                    <span className="text-[#F59E0B] font-bold">{operatorParams.peakSolarIrradianceWm2} W/m²</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={1200}
-                    step={20}
-                    value={operatorParams.peakSolarIrradianceWm2}
-                    onChange={(e) => updateParam("peakSolarIrradianceWm2", Number(e.target.value))}
-                    className="w-full accent-[#F59E0B] cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
-                    <span className="flex items-center space-x-1">
-                      <CloudRain className="w-3 h-3 text-[#06B6D4]" />
-                      <span>PRECIPITABLE WATER (PWV)</span>
-                    </span>
-                    <span className="text-[#06B6D4] font-bold">{operatorParams.precipitableWaterVaporMm} mm</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={2}
-                    max={50}
-                    step={1}
-                    value={operatorParams.precipitableWaterVaporMm}
-                    onChange={(e) => updateParam("precipitableWaterVaporMm", Number(e.target.value))}
-                    className="w-full accent-[#06B6D4] cursor-pointer"
-                  />
-                  <span className="text-[9px] text-[#737885]">Desert ~5mm · Standard ~14mm · Tropical ~40mm</span>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
-                    <span>ATMOSPHERIC CLOUD COVER</span>
-                    <span className="text-[#A78BFA] font-bold">{operatorParams.atmosphericWindowCloudCoverPct}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={5}
-                    value={operatorParams.atmosphericWindowCloudCoverPct}
-                    onChange={(e) => updateParam("atmosphericWindowCloudCoverPct", Number(e.target.value))}
-                    className="w-full accent-[#A78BFA] cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
-                    <span className="flex items-center space-x-1">
-                      <Wind className="w-3 h-3 text-[#9CA3AF]" />
-                      <span>PARASITIC CONVECTION (h_c)</span>
-                    </span>
-                    <span className="text-[#9CA3AF] font-bold">{operatorParams.convectiveHeatCoeffHc} W/m²K</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={1.0}
-                    max={18.0}
-                    step={0.5}
-                    value={operatorParams.convectiveHeatCoeffHc}
-                    onChange={(e) => updateParam("convectiveHeatCoeffHc", Number(e.target.value))}
-                    className="w-full accent-[#9CA3AF] cursor-pointer"
-                  />
-                </div>
-              </div>
-            )}
-
             {/* Membrane-specific Controls */}
             {isMembrane && (
               <div className="space-y-3">
@@ -855,113 +714,6 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                     <span className="font-bold">Trigger Toxic Invariant Breach</span>
                   </label>
                   <span className="text-[9px] text-[#737885] block mt-0.5">Tests Region E instant hard-seal & STOP boundary</span>
-                </div>
-              </div>
-            )}
-
-            {/* Antikythera-specific Controls (Including 223 vs 224 tooth hypothesis switch) */}
-            {isAntikythera && (
-              <div className="space-y-3">
-                {/* Hypothesis Branching Switcher */}
-                <div className="p-2.5 rounded bg-[#1C1F28] border border-[#F59E0B]/40 space-y-1.5">
-                  <div className="flex justify-between items-center text-[10px] text-[#F59E0B] font-bold uppercase">
-                    <span>SAROS DIAL TOOTH COUNT HYPOTHESIS:</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button
-                      onClick={() => updateParam("sarosToothHypothesis", "MODEL_A_223")}
-                      className={`p-1.5 rounded text-[10px] font-bold border transition-colors cursor-pointer text-center ${
-                        operatorParams.sarosToothHypothesis === "MODEL_A_223"
-                          ? "bg-amber-500 text-black border-amber-400 font-extrabold shadow-md"
-                          : "bg-[#12141A] text-[#8A8F9A] border-[#2A2E39] hover:text-[#E6E4DF]"
-                      }`}
-                    >
-                      MODEL A (223T)
-                      <span className="block text-[8px] opacity-80">0.00% Sync Saros</span>
-                    </button>
-                    <button
-                      onClick={() => updateParam("sarosToothHypothesis", "MODEL_B_224")}
-                      className={`p-1.5 rounded text-[10px] font-bold border transition-colors cursor-pointer text-center ${
-                        operatorParams.sarosToothHypothesis === "MODEL_B_224"
-                          ? "bg-purple-600 text-white border-purple-400 font-extrabold shadow-md"
-                          : "bg-[#12141A] text-[#8A8F9A] border-[#2A2E39] hover:text-[#E6E4DF]"
-                      }`}
-                    >
-                      MODEL B (224T)
-                      <span className="block text-[8px] opacity-80">+0.45% Shift Variant</span>
-                    </button>
-                  </div>
-                  <p className="text-[9px] text-[#A0A4AB] leading-tight">
-                    {operatorParams.sarosToothHypothesis === "MODEL_A_223"
-                      ? "Standard Saros eclipse cycle: 223 synodic months. Residual error: 0.00° / cycle."
-                      : "Alternative 224-tooth hypothesis: Cumulative phase drift +58.3° after 4 Saros cycles."}
-                  </p>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
-                    <span>INPUT CRANK ROTATION</span>
-                    <span className="text-[#F59E0B] font-bold">{operatorParams.crankAngleDeg}°</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={360}
-                    step={5}
-                    value={operatorParams.crankAngleDeg}
-                    onChange={(e) => updateParam("crankAngleDeg", Number(e.target.value))}
-                    className="w-full accent-[#F59E0B] cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
-                    <span>GEAR BACKLASH ERROR</span>
-                    <span className="text-[#8B5CF6] font-bold">{operatorParams.backlashMm} mm</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0.01}
-                    max={0.2}
-                    step={0.01}
-                    value={operatorParams.backlashMm}
-                    onChange={(e) => updateParam("backlashMm", Number(e.target.value))}
-                    className="w-full accent-[#8B5CF6] cursor-pointer"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Termite-specific Controls */}
-            {isTermite && (
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
-                    <span>BOUNDARY WIND SPEED</span>
-                    <span className="text-[#60A5FA] font-bold">{operatorParams.windSpeedMps} m/s</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={12}
-                    step={0.5}
-                    value={operatorParams.windSpeedMps}
-                    onChange={(e) => updateParam("windSpeedMps", Number(e.target.value))}
-                    className="w-full accent-[#60A5FA] cursor-pointer"
-                  />
-                </div>
-
-                <div className="pt-2 border-t border-[#22252D]">
-                  <label className="flex items-center space-x-2 text-[11px] cursor-pointer text-[#EAB308]">
-                    <input
-                      type="checkbox"
-                      checked={operatorParams.isChimneySealed}
-                      onChange={(e) => updateParam("isChimneySealed", e.target.checked)}
-                      className="accent-[#EAB308]"
-                    />
-                    <span className="font-bold">Seal Outer Chimney Vent</span>
-                  </label>
-                  <span className="text-[9px] text-[#737885] block mt-0.5">Tests thermal stack stall and CO2 asphyxiation threshold</span>
                 </div>
               </div>
             )}

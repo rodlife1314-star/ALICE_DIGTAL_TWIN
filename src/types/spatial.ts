@@ -73,7 +73,7 @@ export interface SpatialFieldData {
 export interface InstancedParticleCollection {
   id: string;
   count: number;
-  particleType: "ion" | "gas_molecule" | "termite_agent" | "photon_ray" | "nanopore";
+  particleType: "ion" | "gas_molecule" | "plasma_particle" | "photon_ray" | "nanopore";
   color: string;
   emissive?: string;
   size: number;

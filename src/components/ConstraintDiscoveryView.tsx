@@ -101,16 +101,15 @@ export function ConstraintDiscoveryView({ twin, onUpdateTwin }: ConstraintDiscov
       patternName: "Boundary Permeability Equilibrium Pattern",
       category: "Boundary Regulation",
       description: "Controls the rate of energy/mass exchange across physical boundaries to prevent runaway feedback or structural depletion.",
-      affectedTwinIds: ["termite-colony-01", "membrane-02", "oxford-env-03", "cooled-radiative-cooling-06"],
+      affectedTwinIds: ["alice-vessel-ccv01", "aerial-vehicle-01", "intelligent-protective-membrane-07"],
       affectedTwinNames: [
-        "Subterranean Termite Colony (Biological)",
-        "Programmable Membrane System (Engineered)",
-        "Oxford Urban Environment (Environmental)",
-        "COOLed Radiative Cooling (Physical)"
+        "Alice Vessel CCV-01 (Engineered)",
+        "AERIAL-VEHICLE-01 (Avionics)",
+        "Intelligent Protective Membrane (Materials)"
       ],
       underlyingMustCondition: "Permeability rate must dynamically adjust based on environmental input pressure (infrared transmission window, moisture, or solute concentration) to maintain core stability.",
-      sharedEvidenceSummary: "Humidity equilibrium in Termite Core, selective charge filtering in Lipid Barrier, and 8–13 μm atmospheric window gating in COOLed all share identical boundary permeability kinetics.",
-      falsificationProof: "Falsification Test: Removing dynamic permeability enforcement causes thermal runaway in Termite Core within 14 cycles and collapses sub-ambient radiative cooling under high humidity (RH > 68%). MUST confirmed.",
+      sharedEvidenceSummary: "Core thermal equilibrium, selective charge filtering in Lipid Barrier, and 8–13 μm atmospheric window gating in thermal dissipation all share identical boundary permeability kinetics.",
+      falsificationProof: "Falsification Test: Removing dynamic permeability enforcement causes thermal runaway in Vessel Core and collapses sub-ambient radiative cooling under high humidity (RH > 68%). MUST confirmed.",
       crossTwinRiskLevel: "CRITICAL_MUST"
     },
     {
@@ -118,15 +117,15 @@ export function ConstraintDiscoveryView({ twin, onUpdateTwin }: ConstraintDiscov
       patternName: "Resonant Feedback Damping & Spectral Gating",
       category: "Feedback Dynamics",
       description: "Dissipates harmonic accumulation or physical acoustic/optical standing waves before system balance is lost.",
-      affectedTwinIds: ["music-arch-04", "antikythera-mechanism-05", "cooled-radiative-cooling-06"],
+      affectedTwinIds: ["alice-vessel-ccv01", "aerial-vehicle-01", "intelligent-protective-membrane-07"],
       affectedTwinNames: [
-        "Music Architecture Audio System (Musical)",
-        "Antikythera Mechanism (Physical)",
-        "COOLed Radiative Cooling (Physical)"
+        "Alice Vessel CCV-01 (RF Cavity)",
+        "AERIAL-VEHICLE-01 (Aero Edge)",
+        "Intelligent Protective Membrane (Piezoresistive)"
       ],
-      underlyingMustCondition: "Spectral filtering and damping must isolate target operational bands (80Hz sub-bass / 8–13μm IR window / integer tooth mesh) from parasitic noise.",
-      sharedEvidenceSummary: "Sub-bass transient lock in Audio System, lunar epicyclic anomaly in Antikythera, and C-F vibrational dipole photon emission in COOLed share deterministic spectral selection physics.",
-      falsificationProof: "Falsification Test: Operating without spectral isolation allows solar absorption and parasitic harmonics to overwhelm signal. MUST confirmed.",
+      underlyingMustCondition: "Spectral filtering and damping must isolate target operational bands (G6 coaxial 2.80 GHz / 8–13μm IR window / integer tooth mesh) from parasitic noise.",
+      sharedEvidenceSummary: "G6 coaxial cavity resonance, RF coupling dissipation, and SPhP vibrational dipole photon emission share deterministic spectral selection physics.",
+      falsificationProof: "Falsification Test: Operating without spectral isolation allows boundary reflection and parasitic harmonics to overwhelm signal. MUST confirmed.",
       crossTwinRiskLevel: "CRITICAL_MUST"
     },
     {
@@ -134,10 +133,10 @@ export function ConstraintDiscoveryView({ twin, onUpdateTwin }: ConstraintDiscov
       patternName: "Provenance & Epistemic Truth Boundary Ledger",
       category: "Provenance & Authority",
       description: "Enforces strict separation between empirical observations, model inferences, and hypothetical claims before commitment.",
-      affectedTwinIds: ["antikythera-mechanism-05", "cooled-radiative-cooling-06", "termite-colony-01"],
+      affectedTwinIds: ["alice-vessel-ccv01", "aerial-vehicle-01", "intelligent-protective-membrane-07"],
       affectedTwinNames: [
-        "Antikythera Mechanism (Physical)",
-        "COOLed Radiative Cooling (Physical)",
+        "Alice Vessel CCV-01 (Engineered)",
+        "AERIAL-VEHICLE-01 (Avionics)",
         "All Physical & Engineered Digital Twins"
       ],
       underlyingMustCondition: "Every state transition proposal must distinguish measured ground-truth from calculated simulations and unverified extrapolations.",

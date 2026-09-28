@@ -27,6 +27,13 @@ import {
   ALICE_TWIN_MODELS,
   ALICE_TWIN_CORRIDORS
 } from "./aliceTwinOperatorJourney";
+import { computeRadiativeThermalBalance } from "../alice-vessel/lib/thermal-radiation-engine";
+import { evaluateBoundaryMembraneTransport } from "../alice-vessel/lib/boundary-membrane-engine";
+import { analyzeGibsonAshbyLattice, CANONICAL_ALUMINIUM_7075 } from "../alice-vessel/lib/structures-materials-engine";
+import { computeStackBuoyancyConvection, computePorousMediaDarcyFlow } from "../alice-vessel/lib/convective-transport-engine";
+import { runAntikytheraKinematicBenchmark } from "../physics-lab/benchmarks/AntikytheraKinematicsBenchmark";
+import { runConvectiveBuoyancyBenchmark } from "../physics-lab/benchmarks/ConvectiveBuoyancyBenchmark";
+import { sha256Hex as canonicalCryptoSha256 } from "./crypto";
 
 console.log("==================================================================");
 console.log("    PATHFINDER DIGITAL TWIN SUBSTRATE — INVARIANT TEST SUITE     ");
@@ -717,6 +724,143 @@ assert(foamCoupon.modulusRatio === 0.0784, "Open-cell bending foam obeys quadrat
 assert(ALICE_TWIN_MODELS.g6_coaxial_cavity.primaryEpistemicAnchor.epistemicClass === "MEASURED", "Physical bench RTD receipt is anchored to MEASURED");
 assert(ALICE_TWIN_MODELS.aerial_vehicle_01.primaryEpistemicAnchor.receiptId === "RCPT-EDGE-JETSON-20260918-001", "AERIAL-VEHICLE-01 anchored to Jetson Orin Nano hardware receipt");
 assert(ALICE_TWIN_CORRIDORS[0].epistemicClass === "HYPOTHESIS", "Solar wind corridor carrier is strictly HYPOTHESIS");
+
+// ── TEST GROUP 13: PERMANENT ALICE PHYSICS & PHYSICS LAB BENCHMARKS ──────────
+console.log("\n[TEST GROUP 13: Permanent Alice Physics Engines & Laboratory Benchmarks]");
+
+// 1. Canonical Crypto Utility Verification
+const emptyStringHash = canonicalCryptoSha256("");
+assert(emptyStringHash === "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "Canonical SHA-256 produces exact NIST standard empty string digest");
+const testVectorHash = canonicalCryptoSha256("ALICE_PHYSICS_BENCHMARK");
+assert(testVectorHash.length === 64, "Canonical SHA-256 produces exactly 64-hex-character digest");
+
+// 2. Thermal & Radiative Dissipation Engine (Extracted from COOLed)
+const radiativeResult = computeRadiativeThermalBalance({
+  surfaceTempKelvin: 298.15, // 25°C
+  ambientTempKelvin: 305.15, // 32°C (sub-ambient condition)
+  precipitableWaterVaporMm: 12.0,
+  solarIrradianceWm2: 800.0,
+  parasiticConvectionCoeff: 5.0,
+  surfaceEmissivityAtmWindow: 0.95,
+  solarAbsorptivity: 0.035
+});
+assert(radiativeResult.subAmbientDepressionKelvin === -7.0, "Accurately computes sub-ambient temperature depression (-7.0 K)");
+assert(radiativeResult.phononPolaritonResonance.resonanceWavelengthUm === 9.7, "Identifies SiO2 SPhP polariton resonance at 9.7 µm");
+assert(radiativeResult.radiatedPowerWm2 > 400.0, "Stefan-Boltzmann radiated power exceeds 400 W/m² at 298 K");
+assert(radiativeResult.auditHash.startsWith("0x") && radiativeResult.auditHash.length === 66, "Thermal balance receipt carries 64-char hex audit hash");
+
+// 3. Boundary Membrane & Transport Engine (Extracted from Membrane)
+const nominalSpecies = {
+  id: "sp-water",
+  name: "Water Molecule",
+  formula: "H2O",
+  hydratedRadiusNm: 0.28,
+  chargeElementary: 0,
+  velocityMs: 12.0
+};
+const baselineMembraneRegion = {
+  regionId: "region-alpha",
+  nominalPoreRadiusNm: 1.2,
+  appliedBiasVoltageV: 0.0,
+  surfaceChargeMv: -45.0,
+  piezoresistiveGaugeFactor: 14.8,
+  tensileStrainPercent: 0.5,
+  maxSafeRuptureStrainPercent: 2.5
+};
+const permitResult = evaluateBoundaryMembraneTransport(nominalSpecies, baselineMembraneRegion);
+assert(permitResult.action === "PERMIT", "Permits neutral sub-pore species across membrane boundary");
+assert(permitResult.effectivePoreRadiusNm === 1.2, "Nominal pore radius is exactly 1.2 nm under zero bias");
+assert(permitResult.measuredImpedanceDeltaPercent === 7.4, "Piezoresistive impedance shift is 14.8 * 0.5% = 7.4%");
+
+// Voltage electro-actuation pore expansion
+const voltageBiasedRegion = {
+  ...baselineMembraneRegion,
+  appliedBiasVoltageV: 1.0 // +1.0 V bias expands pore by 0.85 nm -> 2.05 nm
+};
+const expandedPoreResult = evaluateBoundaryMembraneTransport(nominalSpecies, voltageBiasedRegion);
+assert(expandedPoreResult.effectivePoreRadiusNm === 2.05, "Electro-actuation bias expands pore to 2.05 nm");
+
+// Steric rejection of oversized molecule
+const bulkySpecies = {
+  id: "sp-albumin",
+  name: "Bovine Albumin",
+  formula: "BSA",
+  hydratedRadiusNm: 3.5, // 3.5 nm > 1.2 nm pore
+  chargeElementary: -1,
+  velocityMs: 5.0
+};
+const rejectResult = evaluateBoundaryMembraneTransport(bulkySpecies, baselineMembraneRegion);
+assert(rejectResult.action === "REJECT", "Sterically excludes oversized species exceeding pore radius");
+
+// Structural rupture STOP invariant trip
+const rupturedRegion = {
+  ...baselineMembraneRegion,
+  tensileStrainPercent: 2.8 // > 2.5% rupture limit
+};
+const ruptureResult = evaluateBoundaryMembraneTransport(nominalSpecies, rupturedRegion);
+assert(ruptureResult.action === "STOP", "Membrane tensile rupture trips critical STOP invariant");
+assert(ruptureResult.isStructuralRuptureImminent === true, "Flags structural rupture imminent");
+
+// 4. Structures & Materials Constitutive Engine (Extracted from Gibson-Ashby)
+const honeycombAnalysis = analyzeGibsonAshbyLattice({
+  topology: "honeycomb",
+  relativeDensity: 0.25,
+  baseMaterial: CANONICAL_ALUMINIUM_7075
+});
+assert(honeycombAnalysis.modulusRatio === 0.20, "Honeycomb linear scaling yields exactly E*/Es = 0.8 * 0.25 = 0.20");
+assert(honeycombAnalysis.effectiveModulusGpa === 14.4, "Aluminium 7075 honeycomb effective modulus is 14.4 GPa");
+assert(honeycombAnalysis.mechanicsClass === "STRETCH_DOMINATED", "Honeycomb classified as STRETCH_DOMINATED");
+
+const auxeticAnalysis = analyzeGibsonAshbyLattice({
+  topology: "reentrant_auxetic",
+  relativeDensity: 0.20,
+  baseMaterial: CANONICAL_ALUMINIUM_7075
+});
+assert(auxeticAnalysis.effectivePoissonsRatio === -0.35, "Re-entrant auxetic lattice yields negative Poisson ratio (-0.35)");
+assert(auxeticAnalysis.mechanicsClass === "AUXETIC_COMPLIANT", "Auxetic classified as AUXETIC_COMPLIANT");
+
+// 5. Convective Buoyancy & Porous Transport Engine (Extracted from Termite)
+const stackResult = computeStackBuoyancyConvection({
+  chimneyHeightM: 3.0,
+  coreTempKelvin: 304.15, // 31°C
+  ambientTempKelvin: 293.15, // 20°C (Delta T = 11 K)
+  ductCrossSectionAreaM2: 0.05
+});
+assert(stackResult.stackVelocityMs > 1.0, "Torricelli-Boussinesq stack velocity exceeds 1.0 m/s for 11 K gradient");
+assert(stackResult.buoyancyPressureDeltaPa > 1.0, "Buoyancy driving pressure exceeds 1.0 Pa");
+assert(stackResult.convectionRegime === "TURBULENT_BUOYANT", "Large chimney stack (Ra > 1e9) evaluates to TURBULENT_BUOYANT regime");
+
+const microDuctResult = computeStackBuoyancyConvection({
+  chimneyHeightM: 0.08, // 80 mm avionics duct
+  coreTempKelvin: 303.15,
+  ambientTempKelvin: 298.15, // Delta T = 5 K
+  ductCrossSectionAreaM2: 0.002
+});
+assert(microDuctResult.convectionRegime === "LAMINAR_NATURAL", "Micro-scale duct (1e3 < Ra < 1e9) evaluates to LAMINAR_NATURAL regime");
+
+const darcyResult = computePorousMediaDarcyFlow({
+  permeabilityM2: 1.0e-11,
+  fluidViscosityPaS: 1.825e-5,
+  bedLengthM: 0.20,
+  pressureDropPa: 5.0,
+  bedCrossSectionAreaM2: 0.5,
+  porosityFraction: 0.40
+});
+assert(darcyResult.darcyVelocityMs > 0 && darcyResult.darcyVelocityMs < 0.01, "Evaluates Darcy superficial velocity within physical micro-flow bounds");
+assert(darcyResult.flowRegime === "DARCY_LINEAR", "Porous media flow regime evaluates to DARCY_LINEAR");
+
+// 6. Physics Laboratory Benchmarks
+const antikytheraProof = runAntikytheraKinematicBenchmark(38, 38, 0.5);
+assert(antikytheraProof.benchmarkVerdict === "VERIFIED_EQUILIBRIUM", "Antikythera nominal benchmark confirms VERIFIED_EQUILIBRIUM");
+const antikytheraBreachProof = runAntikytheraKinematicBenchmark(38, 39, 0.5);
+assert(antikytheraBreachProof.benchmarkVerdict === "VERIFIED_INTERFERENCE_BREACH", "Antikythera perturbed benchmark confirms VERIFIED_INTERFERENCE_BREACH");
+assert(antikytheraBreachProof.centerDistanceDeltaMm === 0.25, "Pitch circle arbor displacement is exactly +0.25 mm");
+assert(antikytheraBreachProof.exactRationalRatio[0] === 39n && antikytheraBreachProof.exactRationalRatio[1] === 38n, "BigInt rational exactness verified");
+
+const convectiveValidation = runConvectiveBuoyancyBenchmark();
+assert(convectiveValidation.benchmarkPassed === true, "Empirical convective buoyancy benchmark passes within 5% error tolerance");
+assert(convectiveValidation.measuredAirspeedMs === 0.18, "Ground truth anemometer airspeed is 0.18 m/s");
+assert(convectiveValidation.errorPercent < 5.0, "Analytical stack model deviates by less than 5% from physical measurement");
 
 // ── TEST SUITE SUMMARY ───────────────────────────────────────────────────────
 console.log("\n==================================================================");

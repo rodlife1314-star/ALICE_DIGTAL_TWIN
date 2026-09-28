@@ -114,7 +114,7 @@ function normalizeTwin(t: any): DigitalTwin {
 export function App() {
   const [twins, setTwins] = useState<DigitalTwin[]>(() => SEED_TWINS.map(normalizeTwin));
   const [activeTwinId, setActiveTwinId] = useState<string | null>(() => {
-    return localStorage.getItem("pathfinder_active_twin_id") || "antikythera-mechanism-05";
+    return localStorage.getItem("pathfinder_active_twin_id") || "alice-vessel-ccv01";
   });
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("overview");
   const [isNewTwinModalOpen, setIsNewTwinModalOpen] = useState(false);
@@ -287,8 +287,8 @@ export function App() {
             const savedTwinId = localStorage.getItem("pathfinder_active_twin_id");
             if (savedTwinId && normalized.some(t => t.id === savedTwinId)) {
               setActiveTwinId(savedTwinId);
-            } else if (normalized.some(t => t.id === "antikythera-mechanism-05")) {
-              setActiveTwinId("antikythera-mechanism-05");
+            } else if (normalized.some(t => t.id === "alice-vessel-ccv01")) {
+              setActiveTwinId("alice-vessel-ccv01");
             } else if (!activeTwinId) {
               setActiveTwinId(normalized[0].id);
             }
