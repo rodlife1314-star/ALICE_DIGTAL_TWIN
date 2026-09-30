@@ -315,10 +315,10 @@ export function SimulationInterface({
                 min="1"
                 max="1000"
                 step="1"
-                value={nominalTeeth}
+                value={nominalTeeth ?? 127}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
-                  setNominalTeeth(isNaN(val) ? 0 : val);
+                  setNominalTeeth(isNaN(val) ? 127 : val);
                 }}
                 className="w-full bg-[#0D1017] border border-[#2D364A] text-xs font-mono text-[#E6E4DF] p-2 rounded focus:outline-none focus:border-[#C5A059]"
               />
@@ -332,10 +332,10 @@ export function SimulationInterface({
                 min="1"
                 max="1000"
                 step="1"
-                value={perturbedTeeth}
+                value={perturbedTeeth ?? 128}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
-                  setPerturbedTeeth(isNaN(val) ? 0 : val);
+                  setPerturbedTeeth(isNaN(val) ? 128 : val);
                 }}
                 className="w-full bg-[#0D1017] border border-[#C5A059] text-xs font-mono text-[#C5A059] p-2 rounded focus:outline-none focus:border-[#D4AF37] font-bold"
               />
@@ -349,10 +349,10 @@ export function SimulationInterface({
                 min="0.01"
                 max="20"
                 step="0.05"
-                value={moduleMm}
+                value={moduleMm ?? 0.5}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
-                  setModuleMm(isNaN(val) ? 0 : val);
+                  setModuleMm(isNaN(val) ? 0.5 : val);
                 }}
                 className="w-full bg-[#0D1017] border border-[#2D364A] text-xs font-mono text-[#E6E4DF] p-2 rounded focus:outline-none focus:border-[#C5A059]"
               />

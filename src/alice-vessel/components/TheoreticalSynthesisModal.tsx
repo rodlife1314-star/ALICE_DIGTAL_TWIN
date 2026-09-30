@@ -283,7 +283,7 @@ export default function TheoreticalSynthesisModal({
               id="input-synthesis-query"
               suppressHydrationWarning
               type="text"
-              value={query}
+              value={query ?? ""}
               onChange={e => setQuery(e.target.value)}
               placeholder={`Ask ${providersStatus.find(p => p.provider === selectedProvider)?.name || 'AI'} about Poynting field topology...`}
               className="flex-1 px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 text-xs font-mono"

@@ -894,15 +894,15 @@ export const AliceTwinCockpitJourney: React.FC<AliceTwinCockpitJourneyProps> = (
             <div className="space-y-2 pt-2">
               <div className="flex justify-between text-xs">
                 <span className="text-[#8A8F9A]">Relative Density (ρ* / ρs):</span>
-                <span className="font-bold text-[#C5A059]">{couponDensity.toFixed(2)}</span>
+                <span className="font-bold text-[#C5A059]">{(couponDensity ?? 0.28).toFixed(2)}</span>
               </div>
               <input
                 type="range"
                 min="0.05"
                 max="0.80"
                 step="0.01"
-                value={couponDensity}
-                onChange={(e) => setCouponDensity(parseFloat(e.target.value))}
+                value={couponDensity ?? 0.28}
+                onChange={(e) => setCouponDensity(parseFloat(e.target.value) || 0.28)}
                 className="w-full h-2 bg-[#1A1F2B] rounded-lg appearance-none cursor-pointer accent-[#C5A059]"
               />
             </div>

@@ -637,7 +637,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
               </label>
               <input
                 type="number"
-                value={kinematicNominalTeeth}
+                value={kinematicNominalTeeth ?? 38}
                 onChange={(e) => handleRecomputeKinematics(parseInt(e.target.value) || 38, kinematicPerturbedTeeth, kinematicModuleMm)}
                 className="w-full bg-[#1A1F2D] border border-[#2F3950] text-xs font-mono text-[#E6E4DF] p-2 rounded focus:outline-none focus:border-[#4ADE80]"
               />
@@ -650,7 +650,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
               </label>
               <input
                 type="number"
-                value={kinematicPerturbedTeeth}
+                value={kinematicPerturbedTeeth ?? 39}
                 onChange={(e) => handleRecomputeKinematics(kinematicNominalTeeth, parseInt(e.target.value) || 39, kinematicModuleMm)}
                 className="w-full bg-[#1A1F2D] border border-[#2F3950] text-xs font-mono text-[#E6E4DF] p-2 rounded focus:outline-none focus:border-[#4ADE80]"
               />
@@ -664,7 +664,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
               <input
                 type="number"
                 step="0.1"
-                value={kinematicModuleMm}
+                value={kinematicModuleMm ?? 0.5}
                 onChange={(e) => handleRecomputeKinematics(kinematicNominalTeeth, kinematicPerturbedTeeth, parseFloat(e.target.value) || 0.5)}
                 className="w-full bg-[#1A1F2D] border border-[#2F3950] text-xs font-mono text-[#E6E4DF] p-2 rounded focus:outline-none focus:border-[#4ADE80]"
               />
@@ -904,7 +904,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
               <input
                 type="text"
                 placeholder="e.g. Sub-Ambient Cooling Boundary Envelope Parameter Sweep"
-                value={scenarioName}
+                value={scenarioName ?? ""}
                 onChange={(e) => setScenarioName(e.target.value)}
                 className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059]"
                 required
@@ -916,7 +916,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
                 Starting State / Baseline
               </label>
               <select
-                value={startingState}
+                value={startingState ?? "Nominal Operating Equilibrium"}
                 onChange={(e) => setStartingState(e.target.value)}
                 className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059]"
               >
@@ -937,7 +937,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
               </label>
               <textarea
                 placeholder="e.g. Sweep Relative Humidity (10% to 90%), Wind Velocity (0.5 to 10 m/s), Cloud Cover (0% to 100%)"
-                value={changedVars}
+                value={changedVars ?? ""}
                 onChange={(e) => setChangedVars(e.target.value)}
                 className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059] h-20 resize-none font-mono"
                 required
@@ -950,7 +950,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
               </label>
               <textarea
                 placeholder="e.g. Solar reflectance 82.4%&#10;Atmospheric window emissivity 96.7%&#10;Stefan-Boltzmann balance"
-                value={assumptionsText}
+                value={assumptionsText ?? ""}
                 onChange={(e) => setAssumptionsText(e.target.value)}
                 className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059] h-20 resize-none font-mono"
               />
@@ -1124,7 +1124,7 @@ export function SimulationView({ twin, onUpdateTwin }: SimulationViewProps) {
                             <input
                               type="text"
                               placeholder="Operator notes (e.g. Sub-ambient envelope verified for building deployment)..."
-                              value={promotionNotes}
+                              value={promotionNotes ?? ""}
                               onChange={(e) => setPromotionNotes(e.target.value)}
                               className="bg-[#10131B] border border-[#2B354F] text-xs p-1.5 rounded font-mono text-[#E6E4DF]"
                             />

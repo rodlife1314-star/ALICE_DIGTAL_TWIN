@@ -400,8 +400,8 @@ export function SixesCulinaryStudio({ twin }: SixesCulinaryStudioProps) {
                 min={20}
                 max={200}
                 step={10}
-                value={scaleCovers}
-                onChange={(e) => setScaleCovers(Number(e.target.value))}
+                value={scaleCovers ?? 40}
+                onChange={(e) => setScaleCovers(Number(e.target.value) || 40)}
                 className="w-full accent-[#509EE3] cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-[#737885]">
@@ -526,8 +526,8 @@ export function SixesCulinaryStudio({ twin }: SixesCulinaryStudioProps) {
                   <input
                     type="number"
                     step={0.1}
-                    value={newObsTemp}
-                    onChange={(e) => setNewObsTemp(Number(e.target.value))}
+                    value={newObsTemp ?? 62.0}
+                    onChange={(e) => setNewObsTemp(parseFloat(e.target.value) || 0)}
                     className="w-full bg-[#13151A] border border-[#262B35] p-2 rounded text-[#E6E4DF] focus:outline-none focus:border-[#509EE3]"
                   />
                 </div>
@@ -537,7 +537,7 @@ export function SixesCulinaryStudio({ twin }: SixesCulinaryStudioProps) {
                     <input
                       type="text"
                       placeholder="e.g. Flash 20s salamander recovery on Table 6..."
-                      value={newObsNotes}
+                      value={newObsNotes ?? ""}
                       onChange={(e) => setNewObsNotes(e.target.value)}
                       className="flex-1 bg-[#13151A] border border-[#262B35] p-2 rounded text-[#E6E4DF] focus:outline-none focus:border-[#509EE3]"
                     />

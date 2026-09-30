@@ -777,7 +777,7 @@ export function ConstraintDiscoveryView({ twin, onUpdateTwin }: ConstraintDiscov
                   </label>
                   <input
                     type="text"
-                    value={featureInput}
+                    value={featureInput ?? ""}
                     onChange={(e) => setFeatureInput(e.target.value)}
                     placeholder="e.g. Cross-Twin Boundary Regulation Graph, Automated Sound Synthesizer..."
                     className="w-full bg-[#181A20] border border-[#2A2E39] text-xs text-[#E6E4DF] rounded px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
@@ -790,7 +790,7 @@ export function ConstraintDiscoveryView({ twin, onUpdateTwin }: ConstraintDiscov
                   </label>
                   <textarea
                     rows={2}
-                    value={featureIntentionInput}
+                    value={featureIntentionInput ?? ""}
                     onChange={(e) => setFeatureIntentionInput(e.target.value)}
                     placeholder="What problem does this feature claim to solve?"
                     className="w-full bg-[#181A20] border border-[#2A2E39] text-xs text-[#E6E4DF] rounded p-3 focus:outline-none focus:border-[#3B82F6]"
@@ -931,7 +931,7 @@ export function ConstraintDiscoveryView({ twin, onUpdateTwin }: ConstraintDiscov
                   </label>
                   <textarea
                     rows={3}
-                    value={intentionInput}
+                    value={intentionInput ?? ""}
                     onChange={(e) => setIntentionInput(e.target.value)}
                     placeholder="e.g. Ensure physical core retains temperature within ±1.5°C under peak flood loading..."
                     className="w-full bg-[#181A20] border border-[#2A2E39] text-xs text-[#E6E4DF] rounded p-3 focus:outline-none focus:border-[#3B82F6]"

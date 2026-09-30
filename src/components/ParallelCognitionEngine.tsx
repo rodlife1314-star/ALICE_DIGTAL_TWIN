@@ -355,7 +355,7 @@ export const ParallelCognitionEngine: React.FC = () => {
         {/* Scenario Selector & Run Control */}
         <div className="flex items-center space-x-3">
           <select
-            value={activeScenario}
+            value={activeScenario ?? "NOMINAL"}
             onChange={(e) => {
               setActiveScenario(e.target.value as SimulationScenario);
               setExecutionStep(0);
@@ -603,7 +603,7 @@ export const ParallelCognitionEngine: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={operatorKey}
+                  value={operatorKey ?? ""}
                   onChange={(e) => setOperatorKey(e.target.value)}
                   className="w-full bg-[#0D0E11] border border-[#282C37] rounded px-3 py-1.5 font-mono text-xs text-[#4ADE80] focus:outline-none"
                 />

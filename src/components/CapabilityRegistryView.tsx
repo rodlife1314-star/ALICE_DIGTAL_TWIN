@@ -284,7 +284,7 @@ export function CapabilityRegistryView({ twin, onUpdateTwin }: CapabilityRegistr
                   Task Classification
                 </label>
                 <select
-                  value={taskType}
+                  value={taskType ?? "simulation"}
                   onChange={(e) => setTaskType(e.target.value as any)}
                   className="w-full bg-[#181A20] border border-[#2A2E39] text-xs text-[#E6E4DF] rounded px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
                 >
@@ -301,7 +301,7 @@ export function CapabilityRegistryView({ twin, onUpdateTwin }: CapabilityRegistr
                   Target Twin Domain
                 </label>
                 <select
-                  value={taskDomain}
+                  value={taskDomain ?? "physical"}
                   onChange={(e) => setTaskDomain(e.target.value as any)}
                   className="w-full bg-[#181A20] border border-[#2A2E39] text-xs text-[#E6E4DF] rounded px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
                 >
@@ -328,7 +328,7 @@ export function CapabilityRegistryView({ twin, onUpdateTwin }: CapabilityRegistr
                   min="20"
                   max="1000"
                   step="10"
-                  value={maxLatency}
+                  value={maxLatency ?? 100}
                   onChange={(e) => setMaxLatency(Number(e.target.value))}
                   className="w-full accent-[#3B82F6] cursor-pointer"
                 />
@@ -344,7 +344,7 @@ export function CapabilityRegistryView({ twin, onUpdateTwin }: CapabilityRegistr
                   min="70"
                   max="99"
                   step="1"
-                  value={minTrustScore}
+                  value={minTrustScore ?? 80}
                   onChange={(e) => setMinTrustScore(Number(e.target.value))}
                   className="w-full accent-[#3B82F6] cursor-pointer"
                 />
@@ -360,7 +360,7 @@ export function CapabilityRegistryView({ twin, onUpdateTwin }: CapabilityRegistr
                   min="2"
                   max="32"
                   step="2"
-                  value={maxVram}
+                  value={maxVram ?? 8}
                   onChange={(e) => setMaxVram(Number(e.target.value))}
                   className="w-full accent-[#3B82F6] cursor-pointer"
                 />
@@ -512,7 +512,7 @@ export function CapabilityRegistryView({ twin, onUpdateTwin }: CapabilityRegistr
               <input
                 type="text"
                 placeholder="Search models, providers..."
-                value={searchTerm}
+                value={searchTerm ?? ""}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="bg-[#13151A] border border-[#22262F] text-xs text-[#E6E4DF] pl-8 pr-3 py-1.5 rounded focus:outline-none focus:border-[#3B82F6] w-48"
               />

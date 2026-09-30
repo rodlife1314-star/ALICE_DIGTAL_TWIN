@@ -170,7 +170,7 @@ export function TimelineView({ twin, onUpdateTwin }: TimelineViewProps) {
                 <input
                   type="text"
                   placeholder="e.g. Boundary Rule Update, Calibrated Heat Capacity"
-                  value={revTitle}
+                  value={revTitle ?? ""}
                   onChange={(e) => setRevTitle(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059]"
                   required
@@ -183,7 +183,7 @@ export function TimelineView({ twin, onUpdateTwin }: TimelineViewProps) {
                 </label>
                 <textarea
                   placeholder="Detailed context regarding changes..."
-                  value={revDesc}
+                  value={revDesc ?? ""}
                   onChange={(e) => setRevDesc(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059] h-20 resize-none"
                 />
@@ -196,7 +196,7 @@ export function TimelineView({ twin, onUpdateTwin }: TimelineViewProps) {
                 <input
                   type="text"
                   placeholder="e.g. Added 2 membrane rules, updated core temperature"
-                  value={revSummary}
+                  value={revSummary ?? ""}
                   onChange={(e) => setRevSummary(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059]"
                   required

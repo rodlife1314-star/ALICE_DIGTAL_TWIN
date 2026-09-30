@@ -293,7 +293,7 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
                 min={0}
                 max={1}
                 step={0.05}
-                value={systemLoad}
+                value={systemLoad ?? 0}
                 onChange={(e) => {
                   setSystemLoad(Number(e.target.value));
                 }}
@@ -308,14 +308,14 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
             <div className="space-y-1">
               <div className="flex justify-between text-[#8A8F9A]">
                 <span>URGENCY ($U$)</span>
-                <span className="text-[#4ADE80] font-bold">{(urgency * 100).toFixed(0)}%</span>
+                <span className="text-[#4ADE80] font-bold">{((urgency ?? 0) * 100).toFixed(0)}%</span>
               </div>
               <input
                 type="range"
                 min={0}
                 max={1}
                 step={0.05}
-                value={urgency}
+                value={urgency ?? 0}
                 onChange={(e) => setUrgency(Number(e.target.value))}
                 className="w-full accent-[#4ADE80] cursor-pointer"
               />
@@ -328,14 +328,14 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
             <div className="space-y-1">
               <div className="flex justify-between text-[#8A8F9A]">
                 <span>ANOMALY STRENGTH ($A$)</span>
-                <span className="text-[#EAB308] font-bold">{(anomalyStrength * 100).toFixed(0)}%</span>
+                <span className="text-[#EAB308] font-bold">{((anomalyStrength ?? 0) * 100).toFixed(0)}%</span>
               </div>
               <input
                 type="range"
                 min={0}
                 max={1}
                 step={0.05}
-                value={anomalyStrength}
+                value={anomalyStrength ?? 0}
                 onChange={(e) => setAnomalyStrength(Number(e.target.value))}
                 className="w-full accent-[#EAB308] cursor-pointer"
               />
@@ -348,14 +348,14 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
             <div className="space-y-1">
               <div className="flex justify-between text-[#8A8F9A]">
                 <span>SIGNAL PERTURBATION ($\Delta E$)</span>
-                <span className="text-[#C5A059] font-bold">{signalAmplitude.toFixed(2)} V</span>
+                <span className="text-[#C5A059] font-bold">{(signalAmplitude ?? 0.01).toFixed(2)} V</span>
               </div>
               <input
                 type="range"
                 min={0.01}
                 max={1.0}
                 step={0.01}
-                value={signalAmplitude}
+                value={signalAmplitude ?? 0.01}
                 onChange={(e) => setSignalAmplitude(Number(e.target.value))}
                 className="w-full accent-[#C5A059] cursor-pointer"
               />
@@ -634,8 +634,8 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
               step={0.05}
               min={0.1}
               max={1.0}
-              value={candidateParams.electronicCouplingDensity}
-              onChange={(e) => setCandidateParams({ ...candidateParams, electronicCouplingDensity: Number(e.target.value) })}
+              value={candidateParams?.electronicCouplingDensity ?? 0.5}
+              onChange={(e) => setCandidateParams({ ...candidateParams, electronicCouplingDensity: parseFloat(e.target.value) || 0.5 })}
               className="w-full bg-[#181A20] border border-[#2B303C] p-2 rounded text-[#E6E4DF]"
             />
           </div>
@@ -647,8 +647,8 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
               step={0.5}
               min={1.0}
               max={30.0}
-              value={candidateParams.perturbationSensitivity}
-              onChange={(e) => setCandidateParams({ ...candidateParams, perturbationSensitivity: Number(e.target.value) })}
+              value={candidateParams?.perturbationSensitivity ?? 10}
+              onChange={(e) => setCandidateParams({ ...candidateParams, perturbationSensitivity: parseFloat(e.target.value) || 10 })}
               className="w-full bg-[#181A20] border border-[#2B303C] p-2 rounded text-[#E6E4DF]"
             />
           </div>
@@ -660,8 +660,8 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
               step={0.05}
               min={0.1}
               max={1.0}
-              value={candidateParams.signalSeparability}
-              onChange={(e) => setCandidateParams({ ...candidateParams, signalSeparability: Number(e.target.value) })}
+              value={candidateParams?.signalSeparability ?? 0.7}
+              onChange={(e) => setCandidateParams({ ...candidateParams, signalSeparability: parseFloat(e.target.value) || 0.7 })}
               className="w-full bg-[#181A20] border border-[#2B303C] p-2 rounded text-[#E6E4DF]"
             />
           </div>
@@ -673,8 +673,8 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
               step={0.05}
               min={0.1}
               max={1.0}
-              value={candidateParams.environmentalStability}
-              onChange={(e) => setCandidateParams({ ...candidateParams, environmentalStability: Number(e.target.value) })}
+              value={candidateParams?.environmentalStability ?? 0.8}
+              onChange={(e) => setCandidateParams({ ...candidateParams, environmentalStability: parseFloat(e.target.value) || 0.8 })}
               className="w-full bg-[#181A20] border border-[#2B303C] p-2 rounded text-[#E6E4DF]"
             />
           </div>
@@ -686,8 +686,8 @@ export function AttentionGateConsole({ twinId, onEmitDecision }: AttentionGateCo
               step={0.5}
               min={0.5}
               max={10.0}
-              value={candidateParams.readoutCost}
-              onChange={(e) => setCandidateParams({ ...candidateParams, readoutCost: Number(e.target.value) })}
+              value={candidateParams?.readoutCost ?? 2.0}
+              onChange={(e) => setCandidateParams({ ...candidateParams, readoutCost: parseFloat(e.target.value) || 2.0 })}
               className="w-full bg-[#181A20] border border-[#2B303C] p-2 rounded text-[#E6E4DF]"
             />
           </div>

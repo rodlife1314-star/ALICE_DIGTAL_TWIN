@@ -236,7 +236,7 @@ export function GovernanceView({ twin, onUpdateTwin }: GovernanceViewProps) {
                 <input
                   type="text"
                   placeholder="e.g. What is causing thermal buildup in the breeding core?"
-                  value={question}
+                  value={question ?? ""}
                   onChange={(e) => setQuestion(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#4ADE80]"
                   required
@@ -249,7 +249,7 @@ export function GovernanceView({ twin, onUpdateTwin }: GovernanceViewProps) {
                 </label>
                 <textarea
                   placeholder="e.g. Airflow dropped from 0.58 to 0.42 m/s&#10;Core temp rose +0.7°C"
-                  value={evidenceText}
+                  value={evidenceText ?? ""}
                   onChange={(e) => setEvidenceText(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#4ADE80] h-16 resize-none"
                 />
@@ -261,7 +261,7 @@ export function GovernanceView({ twin, onUpdateTwin }: GovernanceViewProps) {
                 </label>
                 <textarea
                   placeholder="Describe detected relationships and changes..."
-                  value={investigation}
+                  value={investigation ?? ""}
                   onChange={(e) => setInvestigation(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#4ADE80] h-16 resize-none"
                 />
@@ -274,7 +274,7 @@ export function GovernanceView({ twin, onUpdateTwin }: GovernanceViewProps) {
                 <input
                   type="text"
                   placeholder="e.g. Is rise caused by reduced airflow or increased egg metabolism?"
-                  value={challenge}
+                  value={challenge ?? ""}
                   onChange={(e) => setChallenge(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#4ADE80]"
                 />
@@ -286,7 +286,7 @@ export function GovernanceView({ twin, onUpdateTwin }: GovernanceViewProps) {
                 </label>
                 <textarea
                   placeholder="Final decision accepted by the Operator..."
-                  value={decision}
+                  value={decision ?? ""}
                   onChange={(e) => setDecision(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#4ADE80] h-16 resize-none"
                   required

@@ -397,7 +397,7 @@ export function AIBOMSecurityMembraneView({ twin }: AIBOMSecurityMembraneViewPro
           <div className="space-y-1.5">
             <label className="text-[#8A8F9A] text-[10px] uppercase font-bold block">INVOKING AGENT</label>
             <select
-              value={selectedAgentName}
+              value={selectedAgentName ?? ""}
               onChange={(e) => setSelectedAgentName(e.target.value)}
               className="w-full bg-[#181A20] border border-[#2A2E39] text-[#E6E4DF] rounded px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
             >
@@ -413,7 +413,7 @@ export function AIBOMSecurityMembraneView({ twin }: AIBOMSecurityMembraneViewPro
             <label className="text-[#8A8F9A] text-[10px] uppercase font-bold block">TARGET MCP TOOL</label>
             <input
               type="text"
-              value={targetMCPTool}
+              value={targetMCPTool ?? ""}
               onChange={(e) => setTargetMCPTool(e.target.value)}
               className="w-full bg-[#181A20] border border-[#2A2E39] text-[#E6E4DF] rounded px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
             />
@@ -440,7 +440,7 @@ export function AIBOMSecurityMembraneView({ twin }: AIBOMSecurityMembraneViewPro
           <label className="text-[#8A8F9A] text-[10px] uppercase font-bold block">PROPOSED MCP TOOL PAYLOAD (JSON)</label>
           <textarea
             rows={4}
-            value={proposedPayloadStr}
+            value={proposedPayloadStr ?? ""}
             onChange={(e) => setProposedPayloadStr(e.target.value)}
             className="w-full bg-[#181A20] border border-[#2A2E39] text-[#E6E4DF] rounded p-3 font-mono text-xs focus:outline-none focus:border-[#3B82F6]"
           />

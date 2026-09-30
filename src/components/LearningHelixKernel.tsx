@@ -206,7 +206,7 @@ export const LearningHelixKernel: React.FC = () => {
         {/* Scenario Selector */}
         <div className="flex items-center space-x-3">
           <select
-            value={selectedScenarioIndex}
+            value={selectedScenarioIndex ?? 0}
             onChange={(e) => {
               setSelectedScenarioIndex(Number(e.target.value));
               setActiveBasePairIndex(0);
@@ -372,7 +372,7 @@ export const LearningHelixKernel: React.FC = () => {
                 Formulate Technical Hypothesis or Operational Decision:
               </label>
               <textarea
-                value={learnerInput}
+                value={learnerInput ?? ""}
                 onChange={(e) => setLearnerInput(e.target.value)}
                 placeholder="Enter your empirical reasoning or quantitative calculation..."
                 rows={4}

@@ -29,7 +29,7 @@ import { NewTwinModal } from "./components/NewTwinModal";
 import { FooterSystemMonitor } from "./components/FooterSystemMonitor";
 
 // Alice Vessel Modules
-import { SimulationParameters } from "./lib/physics-engine";
+import { SimulationParameters, DEFAULT_EIGENMODE_WEIGHTS } from "./lib/physics-engine";
 import { CockpitArtefactTwinView } from "./alice-vessel/components/CockpitArtefactTwinView";
 import { AliceTwinCockpitJourney } from "./alice-vessel/components/AliceTwinCockpitJourney";
 import VesselEngineArchitecture from "./alice-vessel/components/VesselEngineArchitecture";
@@ -138,7 +138,9 @@ export function App() {
     couplingConstant: 0.35,
     radius: 175,
     vesselMode: "cruise_gamma_0",
-    activeCorridor: "corridor_solar_wind"
+    activeCorridor: "corridor_solar_wind",
+    eigenmodeWeights: { ...DEFAULT_EIGENMODE_WEIGHTS },
+    optimalityWeights: { wEta: 0.40, wU: 0.35, wL: 0.25 }
   });
 
   const [nodalTelemetry] = useState<{

@@ -182,8 +182,8 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
     setOperatorParams(prev => ({ ...prev, [key]: val }));
   };
 
-  const isAerial = twin.id === "aerial-vehicle-01" || twin.id.includes("aerial") || twin.name.includes("AERIAL") || twin.domain === "engineered";
   const isVessel = twin.id === "alice-vessel-ccv01" || twin.id.includes("vessel");
+  const isAerial = (twin.id === "aerial-vehicle-01" || twin.id.includes("aerial") || twin.name.includes("AERIAL") || (twin.domain === "aerospace" && !isVessel)) && !isVessel;
   const isMembrane = twin.id === "intelligent-protective-membrane-07" || twin.name.includes("Membrane");
   const isSixes = twin.id === "project-sixes-culinary-08" || twin.name.includes("SIXES");
 
@@ -445,7 +445,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
             min={0.0}
             max={1.0}
             step={0.05}
-            value={explodedFactor}
+            value={explodedFactor ?? 0}
             onChange={(e) => setExplodedFactor(Number(e.target.value))}
             className="w-full accent-[#F59E0B] cursor-pointer"
           />
@@ -487,7 +487,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
             <span className="text-[#A78BFA] font-bold">{activeFieldOverlay}</span>
           </div>
           <select
-            value={activeFieldOverlay}
+            value={activeFieldOverlay ?? "NONE"}
             onChange={(e) => setActiveFieldOverlay(e.target.value as any)}
             className="w-full bg-[#181A20] text-[#E6E4DF] border border-[#262B35] rounded px-2 py-1 text-[10px] cursor-pointer"
           >
@@ -509,7 +509,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
             <span className="text-[#10B981] font-bold">{qualityProfile.toUpperCase()}</span>
           </div>
           <select
-            value={qualityProfile}
+            value={qualityProfile ?? "balanced"}
             onChange={(e) => setQualityProfile(e.target.value as any)}
             className="w-full bg-[#181A20] text-[#E6E4DF] border border-[#262B35] rounded px-2 py-1 text-[10px] cursor-pointer"
           >
@@ -674,14 +674,14 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                 <div>
                   <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
                     <span>SURFACE POTENTIAL</span>
-                    <span className="text-[#509EE3] font-bold">{operatorParams.surfacePotentialMv} mV</span>
+                    <span className="text-[#509EE3] font-bold">{operatorParams?.surfacePotentialMv ?? -60} mV</span>
                   </div>
                   <input
                     type="range"
                     min={-100}
                     max={50}
                     step={5}
-                    value={operatorParams.surfacePotentialMv}
+                    value={operatorParams?.surfacePotentialMv ?? -60}
                     onChange={(e) => updateParam("surfacePotentialMv", Number(e.target.value))}
                     className="w-full accent-[#509EE3] cursor-pointer"
                   />
@@ -690,14 +690,14 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                 <div>
                   <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
                     <span>PORE DIAMETER</span>
-                    <span className="text-[#10B981] font-bold">{operatorParams.poreDiameterNm} nm</span>
+                    <span className="text-[#10B981] font-bold">{operatorParams?.poreDiameterNm ?? 1.8} nm</span>
                   </div>
                   <input
                     type="range"
                     min={0.5}
                     max={4.0}
                     step={0.1}
-                    value={operatorParams.poreDiameterNm}
+                    value={operatorParams?.poreDiameterNm ?? 1.8}
                     onChange={(e) => updateParam("poreDiameterNm", Number(e.target.value))}
                     className="w-full accent-[#10B981] cursor-pointer"
                   />
@@ -707,7 +707,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                   <label className="flex items-center space-x-2 text-[11px] cursor-pointer text-[#F87171]">
                     <input
                       type="checkbox"
-                      checked={operatorParams.isBreachTriggered}
+                      checked={Boolean(operatorParams?.isBreachTriggered)}
                       onChange={(e) => updateParam("isBreachTriggered", e.target.checked)}
                       className="accent-[#EF4444]"
                     />
@@ -724,14 +724,14 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                 <div>
                   <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
                     <span>SERVICE COVERS</span>
-                    <span className="text-[#C5A059] font-bold">{operatorParams.serviceCovers} covers</span>
+                    <span className="text-[#C5A059] font-bold">{operatorParams?.serviceCovers ?? 40} covers</span>
                   </div>
                   <input
                     type="range"
                     min={10}
                     max={120}
                     step={10}
-                    value={operatorParams.serviceCovers}
+                    value={operatorParams?.serviceCovers ?? 40}
                     onChange={(e) => updateParam("serviceCovers", Number(e.target.value))}
                     className="w-full accent-[#C5A059] cursor-pointer"
                   />
@@ -741,7 +741,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                   <label className="flex items-center space-x-2 text-[11px] cursor-pointer text-[#10B981]">
                     <input
                       type="checkbox"
-                      checked={operatorParams.isAllergenQuarantined}
+                      checked={Boolean(operatorParams?.isAllergenQuarantined)}
                       onChange={(e) => updateParam("isAllergenQuarantined", e.target.checked)}
                       className="accent-[#10B981]"
                     />
@@ -803,9 +803,9 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                 <div>
                   <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
                     <span>INDICATED AIRSPEED (TAS)</span>
-                    <span className={`font-bold ${operatorParams.airspeedMps < 9.5 ? "text-red-400" : "text-[#38BDF8]"}`}>
-                      {operatorParams.airspeedMps} m/s
-                      {operatorParams.airspeedMps < 9.5 && " (STALL HAZARD)"}
+                    <span className={`font-bold ${(operatorParams?.airspeedMps ?? 14.2) < 9.5 ? "text-red-400" : "text-[#38BDF8]"}`}>
+                      {operatorParams?.airspeedMps ?? 14.2} m/s
+                      {(operatorParams?.airspeedMps ?? 14.2) < 9.5 && " (STALL HAZARD)"}
                     </span>
                   </div>
                   <input
@@ -813,7 +813,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                     min={8.0}
                     max={26.0}
                     step={0.2}
-                    value={operatorParams.airspeedMps}
+                    value={operatorParams?.airspeedMps ?? 14.2}
                     onChange={(e) => updateParam("airspeedMps", Number(e.target.value))}
                     className="w-full accent-[#38BDF8] cursor-pointer"
                   />
@@ -828,9 +828,9 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                 <div>
                   <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
                     <span>ANGLE OF ATTACK (AoA)</span>
-                    <span className={`font-bold ${operatorParams.angleAttackDeg > 13.5 ? "text-red-400" : "text-[#F59E0B]"}`}>
-                      {operatorParams.angleAttackDeg}°
-                      {operatorParams.angleAttackDeg > 13.5 && " (FLOW SEPARATION)"}
+                    <span className={`font-bold ${(operatorParams?.angleAttackDeg ?? 3.4) > 13.5 ? "text-red-400" : "text-[#F59E0B]"}`}>
+                      {operatorParams?.angleAttackDeg ?? 3.4}°
+                      {(operatorParams?.angleAttackDeg ?? 3.4) > 13.5 && " (FLOW SEPARATION)"}
                     </span>
                   </div>
                   <input
@@ -838,7 +838,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                     min={-2.0}
                     max={16.0}
                     step={0.2}
-                    value={operatorParams.angleAttackDeg}
+                    value={operatorParams?.angleAttackDeg ?? 3.4}
                     onChange={(e) => updateParam("angleAttackDeg", Number(e.target.value))}
                     className="w-full accent-[#F59E0B] cursor-pointer"
                   />
@@ -853,8 +853,8 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                 <div>
                   <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
                     <span>PROPULSION THROTTLE</span>
-                    <span className={`font-bold ${operatorParams.throttlePct > 90 ? "text-amber-400" : "text-[#10B981]"}`}>
-                      {operatorParams.throttlePct}%
+                    <span className={`font-bold ${(operatorParams?.throttlePct ?? 65) > 90 ? "text-amber-400" : "text-[#10B981]"}`}>
+                      {operatorParams?.throttlePct ?? 65}%
                     </span>
                   </div>
                   <input
@@ -862,7 +862,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                     min={0}
                     max={100}
                     step={1}
-                    value={operatorParams.throttlePct}
+                    value={operatorParams?.throttlePct ?? 65}
                     onChange={(e) => updateParam("throttlePct", Number(e.target.value))}
                     className="w-full accent-[#10B981] cursor-pointer"
                   />
@@ -872,14 +872,14 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                 <div>
                   <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
                     <span>CROSSWIND GUST COMPONENT</span>
-                    <span className="text-[#A78BFA] font-bold">{operatorParams.crosswindGustMps} m/s</span>
+                    <span className="text-[#A78BFA] font-bold">{operatorParams?.crosswindGustMps ?? 2.5} m/s</span>
                   </div>
                   <input
                     type="range"
                     min={0}
                     max={15}
                     step={0.5}
-                    value={operatorParams.crosswindGustMps}
+                    value={operatorParams?.crosswindGustMps ?? 2.5}
                     onChange={(e) => updateParam("crosswindGustMps", Number(e.target.value))}
                     className="w-full accent-[#A78BFA] cursor-pointer"
                   />
@@ -889,14 +889,14 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                 <div>
                   <div className="flex justify-between text-[11px] text-[#8A8F9A] mb-1">
                     <span>CORRIDOR ALTITUDE AGL</span>
-                    <span className="text-[#38BDF8] font-bold">{operatorParams.altitudeAglM} m</span>
+                    <span className="text-[#38BDF8] font-bold">{operatorParams?.altitudeAglM ?? 120.0} m</span>
                   </div>
                   <input
                     type="range"
                     min={20}
                     max={400}
                     step={10}
-                    value={operatorParams.altitudeAglM}
+                    value={operatorParams?.altitudeAglM ?? 120.0}
                     onChange={(e) => updateParam("altitudeAglM", Number(e.target.value))}
                     className="w-full accent-[#38BDF8] cursor-pointer"
                   />
@@ -1438,7 +1438,7 @@ export function TwinObservatory({ twin, onNavigateToTab }: TwinObservatoryProps)
                             Documenting why this non-converged compute state is promoted into canonical twin memory. This justification is permanently logged to the immutable audit ledger.
                           </p>
                           <textarea
-                            value={operatorOverrideRationale}
+                            value={operatorOverrideRationale ?? ""}
                             onChange={(e) => setOperatorOverrideRationale(e.target.value)}
                             placeholder="e.g., Authorized exploratory boundary analysis under transient conditions; known asymptotic behavior acceptable for initial thermal envelope..."
                             className="w-full bg-[#111317] border border-[#3A2A2E] rounded p-2 text-xs text-[#E6E4DF] focus:outline-none focus:border-amber-400 font-mono"

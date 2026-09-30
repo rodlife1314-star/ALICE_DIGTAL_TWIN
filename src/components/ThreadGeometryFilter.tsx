@@ -523,15 +523,15 @@ export const ThreadGeometryFilter: React.FC<ThreadGeometryFilterProps> = ({ acti
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-[8px] font-mono text-slate-400 uppercase">
                 <span>Incoming Attention Freq</span>
-                <span className="text-[#c5a059] font-bold">{threadFreq} Hz</span>
+                <span className="text-[#c5a059] font-bold">{threadFreq ?? 8} Hz</span>
               </div>
               <input 
                 type="range" 
                 min="1" 
                 max="24" 
                 step="1"
-                value={threadFreq}
-                onChange={(e) => setThreadFreq(parseInt(e.target.value))}
+                value={threadFreq ?? 8}
+                onChange={(e) => setThreadFreq(parseInt(e.target.value) || 8)}
                 className="w-full accent-[#c5a059] bg-[#050608] h-2.5 md:h-1.5 py-1.5 md:py-1 rounded cursor-pointer"
               />
             </div>
@@ -540,15 +540,15 @@ export const ThreadGeometryFilter: React.FC<ThreadGeometryFilterProps> = ({ acti
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-[8px] font-mono text-slate-400 uppercase">
                 <span>Geometric Bending Strain</span>
-                <span className="text-rose-400 font-bold">{bendFactor}%</span>
+                <span className="text-rose-400 font-bold">{bendFactor ?? 20}%</span>
               </div>
               <input 
                 type="range" 
                 min="0" 
                 max="100" 
                 step="1"
-                value={bendFactor}
-                onChange={(e) => setBendFactor(parseInt(e.target.value))}
+                value={bendFactor ?? 20}
+                onChange={(e) => setBendFactor(parseInt(e.target.value) || 0)}
                 className="w-full accent-rose-500 bg-[#050608] h-2.5 md:h-1.5 py-1.5 md:py-1 rounded cursor-pointer"
               />
               <div className="flex justify-between text-[7.5px] font-mono text-slate-600 mt-0.5">
@@ -562,15 +562,15 @@ export const ThreadGeometryFilter: React.FC<ThreadGeometryFilterProps> = ({ acti
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between text-[8px] font-mono text-slate-400 uppercase">
                 <span>Alignment Focus Angle</span>
-                <span className="text-yellow-400 font-bold">{alignAngle}°</span>
+                <span className="text-yellow-400 font-bold">{alignAngle ?? 0}°</span>
               </div>
               <input 
                 type="range" 
                 min="-180" 
                 max="180" 
                 step="5"
-                value={alignAngle}
-                onChange={(e) => setAlignAngle(parseInt(e.target.value))}
+                value={alignAngle ?? 0}
+                onChange={(e) => setAlignAngle(parseInt(e.target.value) || 0)}
                 className="w-full accent-yellow-500 bg-[#050608] h-2.5 md:h-1.5 py-1.5 md:py-1 rounded cursor-pointer"
               />
               <div className="flex justify-between text-[7.5px] font-mono text-slate-600 mt-0.5">

@@ -149,7 +149,7 @@ export function ClaudiaCognitionConsole({ twin }: ClaudiaCognitionConsoleProps) 
           </label>
           <input
             type="text"
-            value={operatorIntention}
+            value={operatorIntention ?? ""}
             onChange={(e) => setOperatorIntention(e.target.value)}
             className="w-full bg-[#181A20] border border-[#2A2E39] text-[#E6E4DF] rounded px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
             placeholder="Operator intention..."
@@ -162,7 +162,7 @@ export function ClaudiaCognitionConsole({ twin }: ClaudiaCognitionConsoleProps) 
             <span>TASK TYPE</span>
           </label>
           <select
-            value={taskType}
+            value={taskType ?? "simulation_routing"}
             onChange={(e) => setTaskType(e.target.value)}
             className="w-full bg-[#181A20] border border-[#2A2E39] text-[#E6E4DF] rounded px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
           >
@@ -180,7 +180,7 @@ export function ClaudiaCognitionConsole({ twin }: ClaudiaCognitionConsoleProps) 
           </label>
           <input
             type="text"
-            value={candidateConstraint}
+            value={candidateConstraint ?? ""}
             onChange={(e) => setCandidateConstraint(e.target.value)}
             className="w-full bg-[#181A20] border border-[#2A2E39] text-[#E6E4DF] rounded px-3 py-2 focus:outline-none focus:border-[#3B82F6]"
             placeholder="Candidate constraint under evaluation..."

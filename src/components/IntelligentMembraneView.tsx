@@ -530,8 +530,8 @@ export function IntelligentMembraneView({ twin, onNavigateToTab }: IntelligentMe
                 min={300}
                 max={950}
                 step={10}
-                value={projectileVelocity}
-                onChange={(e) => setProjectileVelocity(Number(e.target.value))}
+                value={projectileVelocity ?? 550}
+                onChange={(e) => setProjectileVelocity(Number(e.target.value) || 550)}
                 className="w-full accent-[#509EE3] cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-[#737885]">

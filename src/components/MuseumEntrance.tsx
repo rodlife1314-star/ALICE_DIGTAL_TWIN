@@ -1148,7 +1148,7 @@ export function MuseumEntrance({ onExplorePreset, inlineView = false }: MuseumEn
               <input
                 type="text"
                 placeholder="Filter vocabulary..."
-                value={vocabSearch}
+                value={vocabSearch ?? ""}
                 onChange={(e) => setVocabSearch(e.target.value)}
                 className="w-full bg-[#050608] border border-[#c5a05922] focus:border-[#c5a059] rounded px-8 py-1.5 text-[11px] font-mono text-[#e0e0e0] focus:outline-none placeholder:text-slate-700"
               />
@@ -2115,8 +2115,8 @@ steps:
                         type="range"
                         min="2"
                         max="30"
-                        value={cumlParams.nNeighbors}
-                        onChange={(e) => setCumlParams(p => ({ ...p, nNeighbors: parseInt(e.target.value) }))}
+                        value={cumlParams?.nNeighbors ?? 15}
+                        onChange={(e) => setCumlParams(p => ({ ...p, nNeighbors: parseInt(e.target.value) || 15 }))}
                         className="accent-cyan-500 cursor-pointer h-2.5 py-1.5 bg-[#0b0c10] rounded"
                       />
                     </div>
@@ -2137,8 +2137,8 @@ steps:
                         type="range"
                         min="2"
                         max="15"
-                        value={cumlParams.minClusterSize}
-                        onChange={(e) => setCumlParams(p => ({ ...p, minClusterSize: parseInt(e.target.value) }))}
+                        value={cumlParams?.minClusterSize ?? 5}
+                        onChange={(e) => setCumlParams(p => ({ ...p, minClusterSize: parseInt(e.target.value) || 5 }))}
                         className="accent-cyan-500 cursor-pointer h-2.5 py-1.5 bg-[#0b0c10] rounded"
                       />
                     </div>
@@ -2159,8 +2159,8 @@ steps:
                         type="range"
                         min="1"
                         max="5"
-                        value={cumlParams.kNeighbors}
-                        onChange={(e) => setCumlParams(p => ({ ...p, kNeighbors: parseInt(e.target.value) }))}
+                        value={cumlParams?.kNeighbors ?? 3}
+                        onChange={(e) => setCumlParams(p => ({ ...p, kNeighbors: parseInt(e.target.value) || 3 }))}
                         className="accent-cyan-500 cursor-pointer h-2.5 py-1.5 bg-[#0b0c10] rounded"
                       />
                     </div>
@@ -2181,8 +2181,8 @@ steps:
                         type="range"
                         min="1"
                         max="4"
-                        value={cumlParams.decayDegree}
-                        onChange={(e) => setCumlParams(p => ({ ...p, decayDegree: parseInt(e.target.value) }))}
+                        value={cumlParams?.decayDegree ?? 2}
+                        onChange={(e) => setCumlParams(p => ({ ...p, decayDegree: parseInt(e.target.value) || 2 }))}
                         className="accent-cyan-500 cursor-pointer h-2.5 py-1.5 bg-[#0b0c10] rounded"
                       />
                     </div>
@@ -2724,8 +2724,8 @@ steps:
                           type="range"
                           min="1"
                           max="8"
-                          value={ngcParams.tritonInstances}
-                          onChange={(e) => setNgcParams(prev => ({ ...prev, tritonInstances: parseInt(e.target.value) }))}
+                          value={ngcParams?.tritonInstances ?? 2}
+                          onChange={(e) => setNgcParams(prev => ({ ...prev, tritonInstances: parseInt(e.target.value) || 2 }))}
                           className="w-full accent-sky-500 bg-[#050608] h-2.5 py-1.5 rounded cursor-pointer"
                         />
                         <span className="text-[8px] text-slate-500 font-mono">Sets the number of parallel hardware-bound compute executors.</span>
@@ -2759,8 +2759,8 @@ steps:
                           min="16"
                           max="80"
                           step="8"
-                          value={ngcParams.rapidsGpuMem}
-                          onChange={(e) => setNgcParams(prev => ({ ...prev, rapidsGpuMem: parseInt(e.target.value) }))}
+                          value={ngcParams?.rapidsGpuMem ?? 32}
+                          onChange={(e) => setNgcParams(prev => ({ ...prev, rapidsGpuMem: parseInt(e.target.value) || 32 }))}
                           className="w-full accent-emerald-500 bg-[#050608] h-2.5 py-1.5 rounded cursor-pointer"
                         />
                         <span className="text-[8px] text-slate-500 font-mono">Pre-allocates memory pool size in VRAM to prevent malloc fragmentation.</span>
@@ -2794,8 +2794,8 @@ steps:
                           min="256"
                           max="1024"
                           step="256"
-                          value={ngcParams.cudaThreads}
-                          onChange={(e) => setNgcParams(prev => ({ ...prev, cudaThreads: parseInt(e.target.value) }))}
+                          value={ngcParams?.cudaThreads ?? 1024}
+                          onChange={(e) => setNgcParams(prev => ({ ...prev, cudaThreads: parseInt(e.target.value) || 1024 }))}
                           className="w-full accent-purple-500 bg-[#050608] h-2.5 py-1.5 rounded cursor-pointer"
                         />
                         <span className="text-[8px] text-slate-500 font-mono">Granularity of parallel hardware execution units (Warp Cores).</span>
@@ -2831,8 +2831,8 @@ steps:
                           min="60"
                           max="240"
                           step="30"
-                          value={ngcParams.isaacFrequency}
-                          onChange={(e) => setNgcParams(prev => ({ ...prev, isaacFrequency: parseInt(e.target.value) }))}
+                          value={ngcParams?.isaacFrequency ?? 120}
+                          onChange={(e) => setNgcParams(prev => ({ ...prev, isaacFrequency: parseInt(e.target.value) || 120 }))}
                           className="w-full accent-rose-500 bg-[#050608] h-2.5 py-1.5 rounded cursor-pointer"
                         />
                         <span className="text-[8px] text-slate-500 font-mono">Fidelity of physical stress simulations under real-time conditions.</span>
@@ -3449,9 +3449,9 @@ ${ngcSelectedStack.map(b => {
                       type="range"
                       min="4"
                       max="8"
-                      value={dflashBlockSize}
+                      value={dflashBlockSize ?? 4}
                       disabled={dflashSimulating}
-                      onChange={(e) => setDflashBlockSize(parseInt(e.target.value))}
+                      onChange={(e) => setDflashBlockSize(parseInt(e.target.value) || 4)}
                       className="w-full accent-amber-500 bg-[#050608] h-2 py-1.5 rounded cursor-pointer disabled:opacity-40"
                     />
                     <span className="text-[8px] text-slate-500 font-mono">

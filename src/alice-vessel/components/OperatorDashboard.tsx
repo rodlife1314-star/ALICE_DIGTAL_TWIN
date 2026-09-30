@@ -446,7 +446,7 @@ export default function OperatorDashboard({
                 <select
                   id="select-active-corridor"
                   suppressHydrationWarning
-                  value={currentCorridorKey}
+                  value={currentCorridorKey ?? 'corridor_solar_wind'}
                   onChange={e => {
                     const cKey = e.target.value as FluxCorridorId;
                     const corridor = COSMIC_FLUX_CORRIDORS[cKey];
@@ -481,8 +481,8 @@ export default function OperatorDashboard({
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-[10px] text-slate-400">
-                    <span>δx: {params.sourceOffsetX.toFixed(1)} px</span>
-                    <span>δy: {params.sourceOffsetY.toFixed(1)} px</span>
+                    <span>δx: {(params?.sourceOffsetX ?? 0).toFixed(1)} px</span>
+                    <span>δy: {(params?.sourceOffsetY ?? 0).toFixed(1)} px</span>
                     <span className="text-amber-400 font-bold">
                       θ = {engineMetrics.threadDeflectionAngleDeg.toFixed(1)}°
                     </span>
@@ -494,13 +494,13 @@ export default function OperatorDashboard({
                     min="-70"
                     max="70"
                     step="1"
-                    value={params.sourceOffsetX}
+                    value={params?.sourceOffsetX ?? 0}
                     onChange={e => {
                       const val = parseFloat(e.target.value);
                       onParamsChange(prev => ({
                         ...prev,
                         sourceOffsetX: val,
-                        vesselMode: Math.hypot(val, prev.sourceOffsetY) > 4 ? 'vectoring_gamma_delta' : 'cruise_gamma_0',
+                        vesselMode: Math.hypot(val, prev.sourceOffsetY ?? 0) > 4 ? 'vectoring_gamma_delta' : 'cruise_gamma_0',
                       }));
                     }}
                     className="w-full accent-amber-400 h-1 bg-slate-800 rounded"
@@ -512,13 +512,13 @@ export default function OperatorDashboard({
                     min="-70"
                     max="70"
                     step="1"
-                    value={params.sourceOffsetY}
+                    value={params?.sourceOffsetY ?? 0}
                     onChange={e => {
                       const val = parseFloat(e.target.value);
                       onParamsChange(prev => ({
                         ...prev,
                         sourceOffsetY: val,
-                        vesselMode: Math.hypot(prev.sourceOffsetX, val) > 4 ? 'vectoring_gamma_delta' : 'cruise_gamma_0',
+                        vesselMode: Math.hypot(prev.sourceOffsetX ?? 0, val) > 4 ? 'vectoring_gamma_delta' : 'cruise_gamma_0',
                       }));
                     }}
                     className="w-full accent-sky-400 h-1 bg-slate-800 rounded"
@@ -591,7 +591,7 @@ export default function OperatorDashboard({
               <div>
                 <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                   <span>Central Axis Height (z₀)</span>
-                  <span className="text-amber-400 font-bold">{params.sourceHeight.toFixed(1)} px</span>
+                  <span className="text-amber-400 font-bold">{(params?.sourceHeight ?? 12.0).toFixed(1)} px</span>
                 </div>
                 <input
                   id="input-source-height"
@@ -600,7 +600,7 @@ export default function OperatorDashboard({
                   min="0"
                   max="35"
                   step="0.5"
-                  value={params.sourceHeight}
+                  value={params?.sourceHeight ?? 12.0}
                   onChange={e => handleSliderChange('sourceHeight', parseFloat(e.target.value))}
                   className="w-full accent-amber-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                 />
@@ -614,7 +614,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Offset Δx</span>
-                    <span className="text-sky-300">{params.sourceOffsetX.toFixed(0)}</span>
+                    <span className="text-sky-300">{(params?.sourceOffsetX ?? 0).toFixed(0)}</span>
                   </div>
                   <input
                     id="input-substrate-offset-x"
@@ -623,7 +623,7 @@ export default function OperatorDashboard({
                     min="-80"
                     max="80"
                     step="2"
-                    value={params.sourceOffsetX}
+                    value={params?.sourceOffsetX ?? 0}
                     onChange={e => handleSliderChange('sourceOffsetX', parseFloat(e.target.value))}
                     className="w-full accent-sky-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />
@@ -631,7 +631,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Offset Δy</span>
-                    <span className="text-sky-300">{params.sourceOffsetY.toFixed(0)}</span>
+                    <span className="text-sky-300">{(params?.sourceOffsetY ?? 0).toFixed(0)}</span>
                   </div>
                   <input
                     id="input-substrate-offset-y"
@@ -640,7 +640,7 @@ export default function OperatorDashboard({
                     min="-80"
                     max="80"
                     step="2"
-                    value={params.sourceOffsetY}
+                    value={params?.sourceOffsetY ?? 0}
                     onChange={e => handleSliderChange('sourceOffsetY', parseFloat(e.target.value))}
                     className="w-full accent-sky-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />
@@ -652,7 +652,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Trajectory Velocity</span>
-                    <span className="text-emerald-400">{params.motionSpeed.toFixed(1)}x</span>
+                    <span className="text-emerald-400">{(params?.motionSpeed ?? 1.0).toFixed(1)}x</span>
                   </div>
                   <input
                     id="input-motion-speed"
@@ -661,7 +661,7 @@ export default function OperatorDashboard({
                     min="0.2"
                     max="3.0"
                     step="0.1"
-                    value={params.motionSpeed}
+                    value={params?.motionSpeed ?? 1.0}
                     onChange={e => handleSliderChange('motionSpeed', parseFloat(e.target.value))}
                     className="w-full accent-emerald-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />
@@ -678,7 +678,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Permittivity (ε_r)</span>
-                    <span className="text-sky-300">{params.permittivity.toFixed(1)}</span>
+                    <span className="text-sky-300">{(params?.permittivity ?? 2.2).toFixed(1)}</span>
                   </div>
                   <input
                     id="input-permittivity"
@@ -687,7 +687,7 @@ export default function OperatorDashboard({
                     min="1.0"
                     max="6.0"
                     step="0.2"
-                    value={params.permittivity}
+                    value={params?.permittivity ?? 2.2}
                     onChange={e => handleSliderChange('permittivity', parseFloat(e.target.value))}
                     className="w-full accent-sky-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />
@@ -696,7 +696,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Conductivity Loss (σ)</span>
-                    <span className="text-rose-400">{params.conductivity.toFixed(2)}</span>
+                    <span className="text-rose-400">{(params?.conductivity ?? 0.15).toFixed(2)}</span>
                   </div>
                   <input
                     id="input-conductivity"
@@ -705,7 +705,7 @@ export default function OperatorDashboard({
                     min="0.0"
                     max="1.5"
                     step="0.05"
-                    value={params.conductivity}
+                    value={params?.conductivity ?? 0.15}
                     onChange={e => handleSliderChange('conductivity', parseFloat(e.target.value))}
                     className="w-full accent-rose-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />
@@ -717,7 +717,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Boundary Refl (B_i)</span>
-                    <span className="text-purple-300">{params.boundaryReflection.toFixed(2)}</span>
+                    <span className="text-purple-300">{(params?.boundaryReflection ?? 0.45).toFixed(2)}</span>
                   </div>
                   <input
                     id="input-boundary-reflection"
@@ -726,7 +726,7 @@ export default function OperatorDashboard({
                     min="0.0"
                     max="1.0"
                     step="0.05"
-                    value={params.boundaryReflection}
+                    value={params?.boundaryReflection ?? 0.45}
                     onChange={e => handleSliderChange('boundaryReflection', parseFloat(e.target.value))}
                     className="w-full accent-purple-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />
@@ -735,7 +735,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Inter-Node K_ij</span>
-                    <span className="text-amber-300">{params.couplingConstant.toFixed(2)}</span>
+                    <span className="text-amber-300">{(params?.couplingConstant ?? 0.35).toFixed(2)}</span>
                   </div>
                   <input
                     id="input-coupling-constant"
@@ -744,7 +744,7 @@ export default function OperatorDashboard({
                     min="0.0"
                     max="1.0"
                     step="0.05"
-                    value={params.couplingConstant}
+                    value={params?.couplingConstant ?? 0.35}
                     onChange={e => handleSliderChange('couplingConstant', parseFloat(e.target.value))}
                     className="w-full accent-amber-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />
@@ -756,7 +756,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Frequency (ω)</span>
-                    <span className="text-blue-300">{params.sourceFrequency.toFixed(1)} rad/s</span>
+                    <span className="text-blue-300">{(params?.sourceFrequency ?? 2.8).toFixed(1)} rad/s</span>
                   </div>
                   <input
                     id="input-source-frequency"
@@ -765,7 +765,7 @@ export default function OperatorDashboard({
                     min="1.0"
                     max="6.0"
                     step="0.2"
-                    value={params.sourceFrequency}
+                    value={params?.sourceFrequency ?? 2.8}
                     onChange={e => handleSliderChange('sourceFrequency', parseFloat(e.target.value))}
                     className="w-full accent-blue-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />
@@ -774,7 +774,7 @@ export default function OperatorDashboard({
                 <div>
                   <div className="flex justify-between font-mono text-[11px] text-slate-300 mb-1">
                     <span>Source Power (P_in)</span>
-                    <span className="text-emerald-300">{params.sourcePower.toFixed(0)} W</span>
+                    <span className="text-emerald-300">{(params?.sourcePower ?? 45).toFixed(0)} W</span>
                   </div>
                   <input
                     id="input-source-power"
@@ -783,7 +783,7 @@ export default function OperatorDashboard({
                     min="10"
                     max="100"
                     step="5"
-                    value={params.sourcePower}
+                    value={params?.sourcePower ?? 45}
                     onChange={e => handleSliderChange('sourcePower', parseFloat(e.target.value))}
                     className="w-full accent-emerald-400 h-1.5 bg-slate-850 rounded-lg cursor-pointer"
                   />

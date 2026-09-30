@@ -367,15 +367,15 @@ export function GeometricArchitectureView() {
                 <div className="space-y-1">
                   <div className="flex justify-between text-[11px] font-mono">
                     <span className="text-[#8A8F9A]">Source Elevation (h):</span>
-                    <span className="text-[#E6E4DF] font-bold">{h} m</span>
+                    <span className="text-[#E6E4DF] font-bold">{h ?? 50} m</span>
                   </div>
                   <input
                     type="range"
                     min="10"
                     max="150"
                     step="5"
-                    value={h}
-                    onChange={(e) => setH(Number(e.target.value))}
+                    value={h ?? 50}
+                    onChange={(e) => setH(Number(e.target.value) || 50)}
                     className="w-full accent-[#4ADE80] cursor-pointer"
                   />
                 </div>
@@ -384,15 +384,15 @@ export function GeometricArchitectureView() {
                 <div className="space-y-1">
                   <div className="flex justify-between text-[11px] font-mono">
                     <span className="text-[#8A8F9A]">Receiver Ring Radius (r):</span>
-                    <span className="text-[#E6E4DF] font-bold">{r} m</span>
+                    <span className="text-[#E6E4DF] font-bold">{r ?? 60} m</span>
                   </div>
                   <input
                     type="range"
                     min="10"
                     max="150"
                     step="5"
-                    value={r}
-                    onChange={(e) => setR(Number(e.target.value))}
+                    value={r ?? 60}
+                    onChange={(e) => setR(Number(e.target.value) || 60)}
                     className="w-full accent-[#509EE3] cursor-pointer"
                   />
                 </div>
@@ -401,15 +401,15 @@ export function GeometricArchitectureView() {
                 <div className="space-y-1">
                   <div className="flex justify-between text-[11px] font-mono">
                     <span className="text-[#8A8F9A]">Source Radiated Power (P_0):</span>
-                    <span className="text-[#E6E4DF] font-bold">{sourcePowerKw} kW</span>
+                    <span className="text-[#E6E4DF] font-bold">{sourcePowerKw ?? 100} kW</span>
                   </div>
                   <input
                     type="range"
                     min="10"
                     max="500"
                     step="10"
-                    value={sourcePowerKw}
-                    onChange={(e) => setSourcePowerKw(Number(e.target.value))}
+                    value={sourcePowerKw ?? 100}
+                    onChange={(e) => setSourcePowerKw(Number(e.target.value) || 100)}
                     className="w-full accent-[#C5A059] cursor-pointer"
                   />
                 </div>
@@ -643,8 +643,8 @@ export function GeometricArchitectureView() {
                 min="-20"
                 max="20"
                 step="1"
-                value={deltaR}
-                onChange={(e) => setDeltaR(Number(e.target.value))}
+                value={deltaR ?? 0}
+                onChange={(e) => setDeltaR(Number(e.target.value) || 0)}
                 className="w-full accent-[#F87171] cursor-pointer"
               />
               <div className="text-[10px] text-[#73829C]">Perturbs r_{perturbedNodeIndex} from {r}m to {r + deltaR}m</div>
@@ -654,15 +654,15 @@ export function GeometricArchitectureView() {
             <div className="space-y-2 font-mono">
               <div className="flex justify-between">
                 <span className="text-[#8A8F9A]">Angular Displacement (Δθ on N_{perturbedNodeIndex}):</span>
-                <span className="text-[#F59E0B] font-bold">{deltaThetaDeg > 0 ? `+${deltaThetaDeg}` : deltaThetaDeg}°</span>
+                <span className="text-[#F59E0B] font-bold">{(deltaThetaDeg ?? 0) > 0 ? `+${deltaThetaDeg}` : (deltaThetaDeg ?? 0)}°</span>
               </div>
               <input
                 type="range"
                 min="-25"
                 max="25"
                 step="1"
-                value={deltaThetaDeg}
-                onChange={(e) => setDeltaThetaDeg(Number(e.target.value))}
+                value={deltaThetaDeg ?? 0}
+                onChange={(e) => setDeltaThetaDeg(Number(e.target.value) || 0)}
                 className="w-full accent-[#F59E0B] cursor-pointer"
               />
               <div className="text-[10px] text-[#73829C]">Shifts node azimuth off canonical 60° grid</div>
@@ -672,15 +672,15 @@ export function GeometricArchitectureView() {
             <div className="space-y-2 font-mono">
               <div className="flex justify-between">
                 <span className="text-[#8A8F9A]">Elevation Displacement (Δh):</span>
-                <span className="text-[#509EE3] font-bold">{deltaH > 0 ? `+${deltaH}` : deltaH} m</span>
+                <span className="text-[#509EE3] font-bold">{(deltaH ?? 0) > 0 ? `+${deltaH}` : (deltaH ?? 0)} m</span>
               </div>
               <input
                 type="range"
                 min="-15"
                 max="15"
                 step="1"
-                value={deltaH}
-                onChange={(e) => setDeltaH(Number(e.target.value))}
+                value={deltaH ?? 0}
+                onChange={(e) => setDeltaH(Number(e.target.value) || 0)}
                 className="w-full accent-[#509EE3] cursor-pointer"
               />
               <div className="text-[10px] text-[#73829C]">Shifts source height to {h + deltaH}m</div>

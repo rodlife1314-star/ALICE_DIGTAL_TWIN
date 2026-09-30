@@ -435,11 +435,11 @@ export const G6CausalChallenge: React.FC<G6CausalChallengeProps> = ({
                     min="0.8"
                     max="5.0"
                     step="0.1"
-                    value={params.sourceFrequency}
+                    value={params?.sourceFrequency ?? 2.8}
                     onChange={e => onUpdateParams({ sourceFrequency: parseFloat(e.target.value) })}
                     className="w-28 accent-sky-500 cursor-pointer"
                   />
-                  <span className="text-slate-200">{params.sourceFrequency.toFixed(1)} rad/s</span>
+                  <span className="text-slate-200">{(params?.sourceFrequency ?? 2.8).toFixed(1)} rad/s</span>
                 </div>
               )}
             </div>
@@ -479,7 +479,7 @@ export const G6CausalChallenge: React.FC<G6CausalChallengeProps> = ({
                 min="-0.30"
                 max="0.30"
                 step="0.02"
-                value={eccentricitySlider}
+                value={eccentricitySlider ?? 0}
                 onChange={e => setEccentricitySlider(parseFloat(e.target.value))}
                 className="flex-1 accent-amber-500 cursor-pointer"
               />
@@ -619,7 +619,7 @@ export const G6CausalChallenge: React.FC<G6CausalChallengeProps> = ({
                 min="-60"
                 max="60"
                 step="2"
-                value={transverseDeltaX}
+                value={transverseDeltaX ?? 0}
                 onChange={e => setTransverseDeltaX(parseFloat(e.target.value))}
                 className="w-full h-1.5 bg-slate-800 rounded appearance-none cursor-pointer accent-amber-400"
               />

@@ -789,7 +789,7 @@ export function ComputeRegistry({ twin, onNavigateToTab }: ComputeRegistryProps)
                 </label>
                 <input
                   type="text"
-                  value={operatorId}
+                  value={operatorId ?? ""}
                   onChange={(e) => setOperatorId(e.target.value)}
                   className="w-full bg-[#141720] border border-[#262D3D] rounded-lg px-3.5 py-2 text-xs text-[#E6E4DF] focus:outline-none focus:border-[#C5A059]"
                 />
@@ -800,7 +800,7 @@ export function ComputeRegistry({ twin, onNavigateToTab }: ComputeRegistryProps)
                   Sample Size ($N$ Float64 Elements)
                 </label>
                 <select
-                  value={sampleSize}
+                  value={sampleSize ?? 25000}
                   onChange={(e) => setSampleSize(Number(e.target.value))}
                   className="w-full bg-[#141720] border border-[#262D3D] rounded-lg px-3.5 py-2 text-xs text-[#E6E4DF] focus:outline-none focus:border-[#C5A059]"
                 >
@@ -974,7 +974,7 @@ export function ComputeRegistry({ twin, onNavigateToTab }: ComputeRegistryProps)
                   </label>
                   <textarea
                     rows={4}
-                    value={customParams}
+                    value={customParams ?? ""}
                     onChange={(e) => setCustomParams(e.target.value)}
                     className="w-full bg-[#12141A] border border-[#262D3D] rounded-lg p-3 text-xs text-[#E6E4DF] font-mono focus:outline-none focus:border-[#C5A059]"
                   />

@@ -939,7 +939,7 @@ export default function CCV01VehicleStudio({
               <div className="flex items-center justify-between font-mono text-[11px] mb-1">
                 <span className="text-slate-400">Destination Vector (θ_D):</span>
                 <span className="text-sky-300 font-bold">
-                  {destVectorAngle > 0 ? `+${destVectorAngle}° Right` : destVectorAngle < 0 ? `${destVectorAngle}° Left` : '0° Bore-Sight'}
+                  {(destVectorAngle ?? 0) > 0 ? `+${destVectorAngle}° Right` : (destVectorAngle ?? 0) < 0 ? `${destVectorAngle}° Left` : '0° Bore-Sight'}
                 </span>
               </div>
               <input
@@ -948,10 +948,11 @@ export default function CCV01VehicleStudio({
                 min="-45"
                 max="45"
                 step="1"
-                value={destVectorAngle}
+                value={destVectorAngle ?? 0}
                 onChange={e => {
-                  setDestVectorAngle(parseInt(e.target.value, 10));
-                  if (operatingState !== 'vector' && Math.abs(parseInt(e.target.value, 10)) > 5) {
+                  const val = parseInt(e.target.value, 10) || 0;
+                  setDestVectorAngle(val);
+                  if (operatingState !== 'vector' && Math.abs(val) > 5) {
                     setOperatingState('vector');
                   }
                 }}
@@ -969,7 +970,7 @@ export default function CCV01VehicleStudio({
               <div className="flex items-center justify-between font-mono text-[11px] mb-1">
                 <span className="text-slate-400">Coupling Authority Gain:</span>
                 <span className="text-emerald-400 font-bold">
-                  {(couplingAuthority * 100).toFixed(0)}%
+                  {((couplingAuthority ?? 0.85) * 100).toFixed(0)}%
                 </span>
               </div>
               <input
@@ -978,8 +979,8 @@ export default function CCV01VehicleStudio({
                 min="0"
                 max="1"
                 step="0.02"
-                value={couplingAuthority}
-                onChange={e => setCouplingAuthority(parseFloat(e.target.value))}
+                value={couplingAuthority ?? 0.85}
+                onChange={e => setCouplingAuthority(parseFloat(e.target.value) || 0)}
                 className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
               />
               <span className="text-[9.5px] font-mono text-slate-500 block mt-0.5">

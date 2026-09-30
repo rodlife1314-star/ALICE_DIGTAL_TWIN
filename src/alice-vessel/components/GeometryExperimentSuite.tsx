@@ -274,7 +274,7 @@ export default function GeometryExperimentSuite({
                 <div>
                   <div className="flex justify-between font-mono text-[10px] text-slate-400 mb-0.5">
                     <span>w_η (Efficiency):</span>
-                    <span className="text-emerald-300 font-bold">{optimalityWeights.wEta.toFixed(2)}</span>
+                    <span className="text-emerald-300 font-bold">{(optimalityWeights?.wEta ?? 0.40).toFixed(2)}</span>
                   </div>
                   <input
                     id="slider-w-eta"
@@ -282,7 +282,7 @@ export default function GeometryExperimentSuite({
                     min="0.0"
                     max="1.0"
                     step="0.05"
-                    value={optimalityWeights.wEta}
+                    value={optimalityWeights?.wEta ?? 0.40}
                     onChange={e => setOptimalityWeights(prev => ({ ...prev, wEta: parseFloat(e.target.value) }))}
                     className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-emerald-400"
                   />
@@ -290,7 +290,7 @@ export default function GeometryExperimentSuite({
                 <div>
                   <div className="flex justify-between font-mono text-[10px] text-slate-400 mb-0.5">
                     <span>w_U (Uniformity):</span>
-                    <span className="text-sky-300 font-bold">{optimalityWeights.wU.toFixed(2)}</span>
+                    <span className="text-sky-300 font-bold">{(optimalityWeights?.wU ?? 0.35).toFixed(2)}</span>
                   </div>
                   <input
                     id="slider-w-u"
@@ -298,7 +298,7 @@ export default function GeometryExperimentSuite({
                     min="0.0"
                     max="1.0"
                     step="0.05"
-                    value={optimalityWeights.wU}
+                    value={optimalityWeights?.wU ?? 0.35}
                     onChange={e => setOptimalityWeights(prev => ({ ...prev, wU: parseFloat(e.target.value) }))}
                     className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-sky-400"
                   />
@@ -306,7 +306,7 @@ export default function GeometryExperimentSuite({
                 <div>
                   <div className="flex justify-between font-mono text-[10px] text-slate-400 mb-0.5">
                     <span>w_L (Loss Penalty):</span>
-                    <span className="text-rose-300 font-bold">{optimalityWeights.wL.toFixed(2)}</span>
+                    <span className="text-rose-300 font-bold">{(optimalityWeights?.wL ?? 0.25).toFixed(2)}</span>
                   </div>
                   <input
                     id="slider-w-l"
@@ -314,7 +314,7 @@ export default function GeometryExperimentSuite({
                     min="0.0"
                     max="1.0"
                     step="0.05"
-                    value={optimalityWeights.wL}
+                    value={optimalityWeights?.wL ?? 0.25}
                     onChange={e => setOptimalityWeights(prev => ({ ...prev, wL: parseFloat(e.target.value) }))}
                     className="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-rose-400"
                   />

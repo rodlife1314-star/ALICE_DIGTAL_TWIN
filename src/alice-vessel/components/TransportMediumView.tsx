@@ -482,7 +482,7 @@ export const TransportMediumView: React.FC = () => {
               <div>
                 <div className="flex justify-between text-slate-400 mb-1">
                   <span>Rail Field Strength (Tesla):</span>
-                  <span className="text-amber-400 font-bold">{customRailFieldT.toFixed(1)} T</span>
+                  <span className="text-amber-400 font-bold">{(customRailFieldT ?? 12.5).toFixed(1)} T</span>
                 </div>
                 <input
                   id="input-custom-rail-field"
@@ -491,7 +491,7 @@ export const TransportMediumView: React.FC = () => {
                   min="0.5"
                   max="15.0"
                   step="0.1"
-                  value={customRailFieldT}
+                  value={customRailFieldT ?? 12.5}
                   onChange={e => setCustomRailFieldT(parseFloat(e.target.value))}
                   className="w-full accent-amber-500 cursor-pointer h-1.5 bg-slate-850 rounded"
                 />
@@ -499,7 +499,7 @@ export const TransportMediumView: React.FC = () => {
               <div>
                 <div className="flex justify-between text-slate-400 mb-1">
                   <span>Rail Phase Coherence (σ_phase):</span>
-                  <span className="text-cyan-400 font-bold">{(customPhaseCoherence * 100).toFixed(1)}%</span>
+                  <span className="text-cyan-400 font-bold">{((customPhaseCoherence ?? 0.94) * 100).toFixed(1)}%</span>
                 </div>
                 <input
                   id="input-custom-phase-coherence"
@@ -508,7 +508,7 @@ export const TransportMediumView: React.FC = () => {
                   min="0.5"
                   max="1.0"
                   step="0.005"
-                  value={customPhaseCoherence}
+                  value={customPhaseCoherence ?? 0.94}
                   onChange={e => setCustomPhaseCoherence(parseFloat(e.target.value))}
                   className="w-full accent-cyan-500 cursor-pointer h-1.5 bg-slate-850 rounded"
                 />
@@ -516,7 +516,7 @@ export const TransportMediumView: React.FC = () => {
               <div>
                 <div className="flex justify-between text-slate-400 mb-1">
                   <span>Vessel Impedance (Z_vessel vs 377Ω):</span>
-                  <span className="text-emerald-400 font-bold">{customVesselImpedance.toFixed(1)} Ω</span>
+                  <span className="text-emerald-400 font-bold">{(customVesselImpedance ?? 377).toFixed(1)} Ω</span>
                 </div>
                 <input
                   id="input-custom-vessel-impedance"
@@ -525,7 +525,7 @@ export const TransportMediumView: React.FC = () => {
                   min="360"
                   max="410"
                   step="0.5"
-                  value={customVesselImpedance}
+                  value={customVesselImpedance ?? 377}
                   onChange={e => setCustomVesselImpedance(parseFloat(e.target.value))}
                   className="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-850 rounded"
                 />

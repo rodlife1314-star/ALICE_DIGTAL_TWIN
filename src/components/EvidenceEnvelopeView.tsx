@@ -262,7 +262,7 @@ export function EvidenceEnvelopeView({ twin, onUpdateTwin, onNavigateToTab }: Ev
               {/* Filters */}
               <div className="flex items-center space-x-2 text-xs">
                 <select
-                  value={filterClass}
+                  value={filterClass ?? "ALL"}
                   onChange={(e) => setFilterClass(e.target.value)}
                   className="bg-[#0D0E11] border border-[#22252D] text-[#E6E4DF] px-2 py-1 rounded text-xs focus:outline-none"
                 >
@@ -274,7 +274,7 @@ export function EvidenceEnvelopeView({ twin, onUpdateTwin, onNavigateToTab }: Ev
                 </select>
 
                 <select
-                  value={filterDomain}
+                  value={filterDomain ?? "ALL"}
                   onChange={(e) => setFilterDomain(e.target.value)}
                   className="bg-[#0D0E11] border border-[#22252D] text-[#E6E4DF] px-2 py-1 rounded text-xs focus:outline-none"
                 >
@@ -505,7 +505,7 @@ export function EvidenceEnvelopeView({ twin, onUpdateTwin, onNavigateToTab }: Ev
                 <div>
                   <label className="text-[10px] uppercase text-[#8A8F9A] block mb-1">Tactical Workload</label>
                   <select
-                    value={selectedTaskType}
+                    value={selectedTaskType ?? "ridge_downdraft"}
                     onChange={(e) => setSelectedTaskType(e.target.value)}
                     disabled={isSimulatingRoute}
                     className="w-full bg-[#0D0E11] border border-[#22252D] text-[#E6E4DF] px-2.5 py-1.5 rounded focus:outline-none"
@@ -520,7 +520,7 @@ export function EvidenceEnvelopeView({ twin, onUpdateTwin, onNavigateToTab }: Ev
                 <div>
                   <label className="text-[10px] uppercase text-[#8A8F9A] block mb-1">Task Difficulty</label>
                   <select
-                    value={taskDifficulty}
+                    value={taskDifficulty ?? "MEDIUM"}
                     onChange={(e) => setTaskDifficulty(e.target.value as any)}
                     disabled={isSimulatingRoute}
                     className="w-full bg-[#0D0E11] border border-[#22252D] text-[#E6E4DF] px-2.5 py-1.5 rounded focus:outline-none"

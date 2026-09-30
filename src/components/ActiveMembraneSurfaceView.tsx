@@ -345,15 +345,15 @@ export function ActiveMembraneSurfaceView({ twinId }: ActiveMembraneSurfaceViewP
             <div className="space-y-1">
               <div className="flex justify-between text-[#8A8F9A]">
                 <span>IONIZATION POTENTIAL</span>
-                <span className="text-[#E6E4DF] font-bold">{atmosphere.ionizationPotentialKvCm.toFixed(1)} kV/cm</span>
+                <span className="text-[#E6E4DF] font-bold">{(atmosphere?.ionizationPotentialKvCm ?? 0).toFixed(1)} kV/cm</span>
               </div>
               <input
                 type="range"
                 min={0.0}
                 max={15.0}
                 step={0.5}
-                value={atmosphere.ionizationPotentialKvCm}
-                onChange={(e) => setAtmosphere({ ...atmosphere, ionizationPotentialKvCm: Number(e.target.value) })}
+                value={atmosphere?.ionizationPotentialKvCm ?? 0}
+                onChange={(e) => setAtmosphere({ ...atmosphere, ionizationPotentialKvCm: parseFloat(e.target.value) || 0 })}
                 className="w-full accent-[#509EE3] cursor-pointer"
               />
               <span className="text-[10px] text-[#737885] block">

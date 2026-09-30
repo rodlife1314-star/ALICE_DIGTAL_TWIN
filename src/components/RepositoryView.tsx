@@ -153,7 +153,7 @@ export function RepositoryView({
           <input
             type="text"
             placeholder="Search by twin name, purpose, or boundary..."
-            value={searchTerm}
+            value={searchTerm ?? ""}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] pl-9 pr-3 py-2 rounded focus:outline-none focus:border-[#C5A059]"
           />

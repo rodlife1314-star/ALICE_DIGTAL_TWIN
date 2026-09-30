@@ -254,7 +254,7 @@ export function ObservationView({ twin, onUpdateTwin }: ObservationViewProps) {
                 </label>
                 <textarea
                   placeholder="Describe the measured phenomenon or observation..."
-                  value={newFactText}
+                  value={newFactText ?? ""}
                   onChange={(e) => setNewFactText(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#509EE3] h-20 resize-none"
                   required
@@ -268,7 +268,7 @@ export function ObservationView({ twin, onUpdateTwin }: ObservationViewProps) {
                 <input
                   type="text"
                   placeholder="e.g. 29.8°C, 0.42 m/s, 98.7% rejection"
-                  value={newValueText}
+                  value={newValueText ?? ""}
                   onChange={(e) => setNewValueText(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#509EE3]"
                   required
@@ -295,7 +295,7 @@ export function ObservationView({ twin, onUpdateTwin }: ObservationViewProps) {
                     Quality Level
                   </label>
                   <select
-                    value={newQuality}
+                    value={newQuality ?? "measured"}
                     onChange={(e) => setNewQuality(e.target.value as Observation["quality"])}
                     className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#509EE3]"
                   >

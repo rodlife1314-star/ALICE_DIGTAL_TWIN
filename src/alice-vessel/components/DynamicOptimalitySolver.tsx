@@ -130,14 +130,14 @@ export const DynamicOptimalitySolver: React.FC<DynamicOptimalitySolverProps> = (
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-slate-300">w_η (Efficiency Weight):</span>
-            <span className="text-emerald-400 font-bold">{currentWeights.wEta.toFixed(2)}</span>
+            <span className="text-emerald-400 font-bold">{(currentWeights?.wEta ?? 1.0).toFixed(2)}</span>
           </div>
           <input
             type="range"
             min="0"
             max="3"
             step="0.1"
-            value={currentWeights.wEta}
+            value={currentWeights?.wEta ?? 1.0}
             onChange={e => handleWeightChange('wEta', parseFloat(e.target.value))}
             className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
           />
@@ -146,14 +146,14 @@ export const DynamicOptimalitySolver: React.FC<DynamicOptimalitySolverProps> = (
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-slate-300">w_U (Uniformity Weight):</span>
-            <span className="text-amber-400 font-bold">{currentWeights.wU.toFixed(2)}</span>
+            <span className="text-amber-400 font-bold">{(currentWeights?.wU ?? 1.0).toFixed(2)}</span>
           </div>
           <input
             type="range"
             min="0"
             max="3"
             step="0.1"
-            value={currentWeights.wU}
+            value={currentWeights?.wU ?? 1.0}
             onChange={e => handleWeightChange('wU', parseFloat(e.target.value))}
             className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
           />
@@ -162,14 +162,14 @@ export const DynamicOptimalitySolver: React.FC<DynamicOptimalitySolverProps> = (
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-slate-300">w_L (Loss Penalty Weight):</span>
-            <span className="text-rose-400 font-bold">{currentWeights.wL.toFixed(2)}</span>
+            <span className="text-rose-400 font-bold">{(currentWeights?.wL ?? 0.5).toFixed(2)}</span>
           </div>
           <input
             type="range"
             min="0"
             max="3"
             step="0.1"
-            value={currentWeights.wL}
+            value={currentWeights?.wL ?? 0.5}
             onChange={e => handleWeightChange('wL', parseFloat(e.target.value))}
             className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
           />

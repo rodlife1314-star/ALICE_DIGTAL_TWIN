@@ -408,7 +408,7 @@ export function SimonMeaningPanel({
               Reasoning Task
             </label>
             <select
-              value={selectedTask}
+              value={selectedTask ?? "INTERPRET"}
               onChange={(e) => setSelectedTask(e.target.value as ReasoningTask)}
               className="w-full bg-[#141720] border border-[#222838] rounded-lg px-3 py-2 text-xs text-[#E6E4DF] focus:outline-none focus:border-[#C5A059] cursor-pointer"
             >
@@ -426,7 +426,7 @@ export function SimonMeaningPanel({
               Approved Engine
             </label>
             <select
-              value={selectedEngine}
+              value={selectedEngine ?? "gemini-provider"}
               onChange={(e) => setSelectedEngine(e.target.value)}
               className="w-full bg-[#141720] border border-[#222838] rounded-lg px-3 py-2 text-xs text-[#38BDF8] focus:outline-none focus:border-[#C5A059] cursor-pointer"
             >
@@ -444,7 +444,7 @@ export function SimonMeaningPanel({
               Reasoning Mode
             </label>
             <select
-              value={reasoningMode}
+              value={reasoningMode ?? "STRICT_DEDUCTIVE"}
               onChange={(e) => setReasoningMode(e.target.value as any)}
               className="w-full bg-[#141720] border border-[#222838] rounded-lg px-3 py-2 text-xs text-[#E6E4DF] focus:outline-none focus:border-[#C5A059] cursor-pointer"
             >
@@ -590,7 +590,7 @@ export function SimonMeaningPanel({
               </span>
               <input
                 type="text"
-                value={adversarialTestPhrase}
+                value={adversarialTestPhrase ?? ""}
                 onChange={(e) => setAdversarialTestPhrase(e.target.value)}
                 className="w-full bg-[#181018] border border-rose-900/60 rounded p-2 text-xs text-[#E6E4DF] font-mono focus:outline-none"
               />

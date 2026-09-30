@@ -626,7 +626,7 @@ export function EpistemicAgentFieldView({ twin, onUpdateTwin }: EpistemicAgentFi
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
-                value={targetIntention}
+                value={targetIntention ?? ""}
                 onChange={(e) => setTargetIntention(e.target.value)}
                 placeholder="e.g. Prevent thermal buildup while preserving structural boundary permeability..."
                 className="flex-1 bg-[#181A20] border border-[#2A2E39] text-xs text-[#E6E4DF] rounded px-3 py-2.5 focus:outline-none focus:border-[#3B82F6]"

@@ -611,7 +611,7 @@ export const VolumetricCavityTransformer: React.FC = () => {
                 min="0"
                 max="6.28"
                 step="0.05"
-                value={wallPhase}
+                value={wallPhase ?? 0}
                 onChange={e => setWallPhase(parseFloat(e.target.value))}
                 className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
               />
@@ -624,7 +624,7 @@ export const VolumetricCavityTransformer: React.FC = () => {
             <div>
               <div className="flex justify-between font-mono text-[11px] mb-1">
                 <span className="text-slate-400">Carrier Frequency (ω):</span>
-                <span className="text-sky-300 font-bold">{frequency.toFixed(2)} GHz</span>
+                <span className="text-sky-300 font-bold">{(frequency ?? 3.2).toFixed(2)} GHz</span>
               </div>
               <input
                 id="slider-frequency"
@@ -632,7 +632,7 @@ export const VolumetricCavityTransformer: React.FC = () => {
                 min="0.8"
                 max="6.0"
                 step="0.05"
-                value={frequency}
+                value={frequency ?? 3.2}
                 onChange={e => setFrequency(parseFloat(e.target.value))}
                 className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400"
               />
@@ -642,7 +642,7 @@ export const VolumetricCavityTransformer: React.FC = () => {
             <div>
               <div className="flex justify-between font-mono text-[11px] mb-1">
                 <span className="text-slate-400">Input Aperture Power (P_in):</span>
-                <span className="text-emerald-300 font-bold">{inputPower.toFixed(1)} W</span>
+                <span className="text-emerald-300 font-bold">{(inputPower ?? 50).toFixed(1)} W</span>
               </div>
               <input
                 id="slider-power"
@@ -650,7 +650,7 @@ export const VolumetricCavityTransformer: React.FC = () => {
                 min="10"
                 max="100"
                 step="1"
-                value={inputPower}
+                value={inputPower ?? 50}
                 onChange={e => setInputPower(parseFloat(e.target.value))}
                 className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
               />
@@ -660,7 +660,7 @@ export const VolumetricCavityTransformer: React.FC = () => {
             <div>
               <div className="flex justify-between font-mono text-[11px] mb-1">
                 <span className="text-slate-400">Substrate Conductivity (σ):</span>
-                <span className="text-rose-400 font-bold">{conductivity.toFixed(2)} S/m</span>
+                <span className="text-rose-400 font-bold">{(conductivity ?? 0.15).toFixed(2)} S/m</span>
               </div>
               <input
                 id="slider-conductivity"
@@ -668,7 +668,7 @@ export const VolumetricCavityTransformer: React.FC = () => {
                 min="0.0"
                 max="0.4"
                 step="0.01"
-                value={conductivity}
+                value={conductivity ?? 0.15}
                 onChange={e => setConductivity(parseFloat(e.target.value))}
                 className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-400"
               />

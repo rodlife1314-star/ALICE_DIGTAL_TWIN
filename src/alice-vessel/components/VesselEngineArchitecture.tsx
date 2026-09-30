@@ -594,12 +594,12 @@ ${(Object.keys(HULL_EIGENMODES) as HullEigenmodeId[]).map(id => {
                   min="-80"
                   max="80"
                   step="1"
-                  value={params.sourceOffsetX}
+                  value={params?.sourceOffsetX ?? 0}
                   onChange={e => {
                     const val = parseFloat(e.target.value);
                     onUpdateParams({
                       sourceOffsetX: val,
-                      vesselMode: Math.hypot(val, params.sourceOffsetY) > 4 ? 'vectoring_gamma_delta' : 'cruise_gamma_0',
+                      vesselMode: Math.hypot(val, params?.sourceOffsetY ?? 0) > 4 ? 'vectoring_gamma_delta' : 'cruise_gamma_0',
                     });
                   }}
                   className="w-full accent-amber-400 h-1.5 bg-slate-800 rounded cursor-pointer"
@@ -615,7 +615,7 @@ ${(Object.keys(HULL_EIGENMODES) as HullEigenmodeId[]).map(id => {
               <div className="p-3 rounded-lg bg-slate-900 border border-slate-850 space-y-1.5">
                 <div className="flex justify-between text-slate-300">
                   <span>Transverse Offset δy:</span>
-                  <span className="text-sky-300 font-bold">{params.sourceOffsetY.toFixed(1)} px</span>
+                  <span className="text-sky-300 font-bold">{(params?.sourceOffsetY ?? 0).toFixed(1)} px</span>
                 </div>
                 <input
                   id="input-vessel-offset-y"
@@ -624,12 +624,12 @@ ${(Object.keys(HULL_EIGENMODES) as HullEigenmodeId[]).map(id => {
                   min="-80"
                   max="80"
                   step="1"
-                  value={params.sourceOffsetY}
+                  value={params?.sourceOffsetY ?? 0}
                   onChange={e => {
                     const val = parseFloat(e.target.value);
                     onUpdateParams({
                       sourceOffsetY: val,
-                      vesselMode: Math.hypot(params.sourceOffsetX, val) > 4 ? 'vectoring_gamma_delta' : 'cruise_gamma_0',
+                      vesselMode: Math.hypot(params?.sourceOffsetX ?? 0, val) > 4 ? 'vectoring_gamma_delta' : 'cruise_gamma_0',
                     });
                   }}
                   className="w-full accent-sky-400 h-1.5 bg-slate-800 rounded cursor-pointer"
@@ -939,7 +939,7 @@ ${(Object.keys(HULL_EIGENMODES) as HullEigenmodeId[]).map(id => {
                       min="0"
                       max="1.0"
                       step="0.05"
-                      value={weight}
+                      value={weight ?? 0}
                       onChange={e => handleUpdateEigenmodeWeight(modeId, parseFloat(e.target.value))}
                       className="w-full h-1.5 bg-slate-850 rounded cursor-pointer"
                       style={{ accentColor: def.color }}

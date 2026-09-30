@@ -391,7 +391,7 @@ export function StructureView({ twin, onUpdateTwin }: StructureViewProps) {
                 <input
                   type="text"
                   placeholder="e.g. ambient_air, thermal_flux, charge_bias"
-                  value={newRuleInput}
+                  value={newRuleInput ?? ""}
                   onChange={(e) => setNewRuleInput(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059]"
                   required
@@ -405,7 +405,7 @@ export function StructureView({ twin, onUpdateTwin }: StructureViewProps) {
                 <input
                   type="text"
                   placeholder="e.g. temperature > 22°C, freq < 80 Hz"
-                  value={newRuleCondition}
+                  value={newRuleCondition ?? ""}
                   onChange={(e) => setNewRuleCondition(e.target.value)}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059]"
                   required
@@ -417,7 +417,7 @@ export function StructureView({ twin, onUpdateTwin }: StructureViewProps) {
                   Action
                 </label>
                 <select
-                  value={newRuleAction}
+                  value={newRuleAction ?? "permit"}
                   onChange={(e) => setNewRuleAction(e.target.value as BoundaryRule["action"])}
                   className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059]"
                 >

@@ -167,7 +167,7 @@ export function NewTwinModal({ isOpen, onClose, onCreateTwin }: NewTwinModalProp
             <input
               type="text"
               placeholder="e.g. Subterranean Hydro-Thermal Network, Non-Oxygen Biosphere"
-              value={name}
+              value={name ?? ""}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059]"
               required
@@ -179,7 +179,7 @@ export function NewTwinModal({ isOpen, onClose, onCreateTwin }: NewTwinModalProp
               Domain Classification
             </label>
             <select
-              value={domain}
+              value={domain ?? "biological"}
               onChange={(e) => setDomain(e.target.value as DigitalTwinDomain)}
               className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059] capitalize"
             >
@@ -199,7 +199,7 @@ export function NewTwinModal({ isOpen, onClose, onCreateTwin }: NewTwinModalProp
             </label>
             <textarea
               placeholder="What does this digital duplicate observe, simulate, or govern?"
-              value={purpose}
+              value={purpose ?? ""}
               onChange={(e) => setPurpose(e.target.value)}
               className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059] h-20 resize-none"
               required
@@ -212,7 +212,7 @@ export function NewTwinModal({ isOpen, onClose, onCreateTwin }: NewTwinModalProp
             </label>
             <textarea
               placeholder="Describe physical, spatial, acoustic, or data limits of the twin..."
-              value={boundaryDesc}
+              value={boundaryDesc ?? ""}
               onChange={(e) => setBoundaryDesc(e.target.value)}
               className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059] h-20 resize-none"
               required
@@ -225,7 +225,7 @@ export function NewTwinModal({ isOpen, onClose, onCreateTwin }: NewTwinModalProp
             </label>
             <textarea
               placeholder="e.g. Primary Reservoir&#10;Thermal Exchange Channel&#10;Pressure Regulator Valve"
-              value={includedEntitiesText}
+              value={includedEntitiesText ?? ""}
               onChange={(e) => setIncludedEntitiesText(e.target.value)}
               className="w-full bg-[#181A20] border border-[#2B303C] text-xs text-[#E6E4DF] p-2.5 rounded focus:outline-none focus:border-[#C5A059] h-20 resize-none"
             />
